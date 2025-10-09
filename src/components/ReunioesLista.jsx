@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 
 function ReunioesLista() {
+  const navigate = useNavigate()
   const [reunioes, setReunioes] = useState([])
   const [empresas, setEmpresas] = useState([])
   const [produtos, setProdutos] = useState([])
@@ -62,33 +63,6 @@ function ReunioesLista() {
     }
   }
 
-  const excluirReuniao = async (id) => {
-    if (!confirm('Tem certeza que deseja excluir esta reunião?')) {
-      return
-    }
-
-    try {
-      // Primeiro excluir relacionamentos
-      await supabase
-        .from('reuniao_participantes')
-        .delete()
-        .eq('reuniao_id', id)
-
-      // Depois excluir a reunião
-      const { error } = await supabase
-        .from('reunioes')
-        .delete()
-        .eq('id', id)
-
-      if (error) throw error
-
-      setMessage('Reunião excluída com sucesso!')
-      carregarDados()
-    } catch (error) {
-      console.error('Erro ao excluir reunião:', error)
-      setMessage('Erro ao excluir reunião: ' + error.message)
-    }
-  }
 
   const marcarComoTratada = async (id, statusAtual) => {
     const novoStatus = statusAtual === 'tratada' ? 'pendente' : 'tratada'
@@ -266,13 +240,11 @@ function ReunioesLista() {
       <div className="table-compact">
         <div className="table-header">
           <div className="col-date">Data</div>
-          <div className="col-title">Título</div>
           <div className="col-empresa">Empresa</div>
           <div className="col-produto">Produto</div>
           <div className="col-status">Status</div>
           <div className="col-resumo">Resumo Ultra Conciso</div>
           <div className="col-todo">To-do Guilherme</div>
-          <div className="col-actions">Ações</div>
         </div>
 
         {reunioesFiltradas.length === 0 ? (
@@ -281,15 +253,21 @@ function ReunioesLista() {
           </div>
         ) : (
           reunioesFiltradas.map(reuniao => (
-            <div key={reuniao.id} className="table-row">
+            <div 
+              key={reuniao.id} 
+              className="table-row table-row-clickable"
+              onClick={() => navigate(`/reuniao/detalhes/${reuniao.id}`)}
+            >
               <div className="col-date">{formatarData(reuniao.data_reuniao)}</div>
-              <div className="col-title">{reuniao.titulo_original || 'Sem título'}</div>
               <div className="col-empresa">{reuniao.empresas?.nome || '-'}</div>
               <div className="col-produto">{reuniao.produtos?.nome || '-'}</div>
               <div className="col-status">
                 <button 
                   className={`status-badge status-clickable ${reuniao.status === 'tratada' ? 'status-tratada' : 'status-pendente'}`}
-                  onClick={() => marcarComoTratada(reuniao.id, reuniao.status)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    marcarComoTratada(reuniao.id, reuniao.status)
+                  }}
                   title={`Clique para marcar como ${reuniao.status === 'tratada' ? 'pendente' : 'tratada'}`}
                 >
                   {reuniao.status === 'tratada' ? 'Tratada' : 'Pendente'}
@@ -297,17 +275,6 @@ function ReunioesLista() {
               </div>
               <div className="col-resumo">{reuniao.resumo_ultra_conciso || '-'}</div>
               <div className="col-todo">{reuniao.tarefas_guilherme || '-'}</div>
-              <div className="col-actions">
-                <Link to={`/resumo-ia/${reuniao.id}`} className="btn-compact btn-resumo" title="Ver Resumo IA">
-                  Resumo IA
-                </Link>
-                <Link to={`/reuniao/${reuniao.id}`} className="btn-compact btn-edit">
-                  Editar
-                </Link>
-                <button onClick={() => excluirReuniao(reuniao.id)} className="btn-compact btn-delete">
-                  Excluir
-                </button>
-              </div>
             </div>
           ))
         )}

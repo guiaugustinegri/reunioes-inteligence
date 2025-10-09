@@ -2,6 +2,7 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import ReunioesLista from './components/ReunioesLista'
 import ReuniaoForm from './components/ReuniaoForm'
+import ReuniaoDetalhes from './components/ReuniaoDetalhes'
 import ResumoIA from './components/ResumoIA'
 import Gerenciar from './components/Gerenciar'
 import './App.css'
@@ -24,6 +25,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ReunioesLista />} />
             <Route path="/reuniao/nova" element={<ReuniaoForm />} />
+            <Route path="/reuniao/detalhes/:id" element={<ReuniaoDetalhes />} />
             <Route path="/reuniao/:id" element={<ReuniaoForm />} />
             <Route path="/resumo-ia/:id" element={<ResumoIA />} />
             <Route path="/gerenciar" element={<Gerenciar />} />
