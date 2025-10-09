@@ -1,0 +1,810 @@
+/* Reset e estilos globais - Estética Jornal/Windows Antigo */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.6;
+  color: #111827;
+  background-color: #e5e7eb;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar - Estilo Jornal */
+.navbar {
+  background-color: #000;
+  color: white;
+  padding: 1rem 0;
+  border-bottom: 4px solid #000;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-container h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-left: 1px solid #333;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.nav-link:first-child {
+  border-left: none;
+}
+
+.nav-link:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+/* Main content */
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  width: 100%;
+}
+
+/* Botões - Estilo Jornal */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #000;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+.btn-primary:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.btn-success {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.btn-success:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.btn-danger {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+.btn-danger:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.btn-warning {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+.btn-warning:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+/* Tabelas - Estilo Jornal */
+.table-container {
+  background: white;
+  border: 2px solid #000;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.table th {
+  background-color: #000;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.75rem;
+}
+
+.table tr:hover {
+  background-color: #f9fafb;
+}
+
+/* Formulários - Estilo Jornal */
+.form-container {
+  background: white;
+  border: 2px solid #000;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #000;
+  text-transform: uppercase;
+  font-size: 0.8125rem;
+  letter-spacing: 0.5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #d1d5db;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  background: #fafafa;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #000;
+  background: white;
+}
+
+.form-control[type="date"] {
+  max-width: 200px;
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+textarea.form-control.large {
+  min-height: 200px;
+}
+
+/* Barra de Busca Moderna - Estilo Jornal */
+.search-bar {
+  background: white;
+  border: 2px solid #000;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #d1d5db;
+  background: #fafafa;
+  color: #111827;
+  font-family: inherit;
+  transition: all 0.2s;
+  margin-bottom: 1rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #000;
+  background: white;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.search-filters {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.date-input,
+.select-filter {
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.date-input {
+  min-width: 140px;
+}
+
+.select-filter {
+  min-width: 150px;
+}
+
+.date-input:focus,
+.select-filter:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.select-filter:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.clear-btn {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #000;
+  background: white;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.clear-btn:hover {
+  background: #000;
+  color: white;
+}
+
+.results-count {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Mensagens - Estilo Jornal */
+.message {
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #000;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+}
+
+.message.success {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+.message.error {
+  background-color: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* Page header - Estilo Jornal */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 4px solid #000;
+}
+
+.page-header h2 {
+  color: #000;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Tabs - Estilo Jornal */
+.tabs {
+  display: flex;
+  border-bottom: 2px solid #000;
+  margin-bottom: 2rem;
+  gap: 0;
+}
+
+.tab {
+  padding: 1rem 2rem;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000;
+  border-right: 1px solid #d1d5db;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tab:hover {
+  background-color: #f3f4f6;
+}
+
+.tab.active {
+  background-color: #000;
+  color: white;
+  border-right-color: #000;
+}
+
+.tab-content {
+  min-height: 400px;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+/* Tabela Compacta - Layout Horizontal - Estilo Jornal */
+.table-compact {
+  background: white;
+  border: 2px solid #000;
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 60px 180px 120px 120px 100px 1fr 1fr 200px;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: #000;
+  color: white;
+  border-bottom: 2px solid #000;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 60px 180px 120px 120px 100px 1fr 1fr 200px;
+  gap: 1rem;
+  padding: 1.5rem 1rem;
+  border-bottom: 1px solid #d1d5db;
+  align-items: start;
+  transition: background-color 0.15s;
+  font-size: 0.875rem;
+}
+
+.table-row:hover {
+  background: #f9fafb;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.col-date {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.col-title {
+  font-weight: 600;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.col-empresa,
+.col-produto {
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+}
+
+.col-resumo,
+.col-todo {
+  color: #4b5563;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.8125rem;
+}
+
+.col-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: 0.25rem;
+}
+
+.btn-compact {
+  padding: 0.375rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.btn-edit {
+  border: 1px solid #3b82f6;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.btn-edit:hover {
+  border-color: #2563eb;
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-delete {
+  border: 1px solid #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.btn-delete:hover {
+  border-color: #dc2626;
+  background: #ef4444;
+  color: white;
+}
+
+.btn-resumo {
+  border: 1px solid #8b5cf6;
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.btn-resumo:hover {
+  border-color: #7c3aed;
+  background: #8b5cf6;
+  color: white;
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-clickable {
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.status-clickable:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+.status-pendente {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.status-tratada {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.empty-row {
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Página Resumo IA */
+.resumo-ia-container {
+  background: white;
+  border: 2px solid #000;
+  overflow: hidden;
+}
+
+.resumo-header {
+  padding: 1.5rem;
+  border-bottom: 2px solid #000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.reuniao-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.meta-badge {
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.resumo-content-wrapper {
+  padding: 2rem;
+}
+
+.resumo-html-display {
+  line-height: 1.8;
+  color: #374151;
+}
+
+.resumo-html-display h1,
+.resumo-html-display h2,
+.resumo-html-display h3,
+.resumo-html-display h4,
+.resumo-html-display h5,
+.resumo-html-display h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.resumo-html-display p {
+  margin-bottom: 1rem;
+}
+
+.resumo-html-display ul,
+.resumo-html-display ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.resumo-html-display li {
+  margin-bottom: 0.5rem;
+}
+
+.resumo-html-display strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+.resumo-html-display a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.resumo-html-display blockquote {
+  border-left: 4px solid #000;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.editor-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.html-editor {
+  width: 100%;
+  min-height: 500px;
+  padding: 1rem;
+  border: 2px solid #d1d5db;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.html-editor:focus {
+  outline: none;
+  border-color: #000;
+}
+
+.editor-preview h4 {
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+}
+
+.resumo-html-preview {
+  border: 2px solid #e5e7eb;
+  padding: 1.5rem;
+  min-height: 500px;
+  background: #fafafa;
+  line-height: 1.8;
+}
+
+.email-form {
+  background: #f9fafb;
+  border: 2px solid #000;
+  padding: 1.5rem;
+  margin: 1.5rem;
+}
+
+.email-form h3 {
+  margin-bottom: 1rem;
+  font-size: 1.125rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-links {
+    gap: 1rem;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    min-width: auto;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .table-compact {
+    overflow-x: auto;
+  }
+  
+  .table-header,
+  .table-row {
+    grid-template-columns: 50px 150px 100px 100px 80px 200px 200px 180px;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .btn-compact {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+  }
+  
+  .editor-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    width: 100%;
+  }
+  
+  .action-buttons .btn {
+    flex: 1;
+  }
+}
