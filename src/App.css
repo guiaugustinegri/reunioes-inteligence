@@ -459,6 +459,23 @@ textarea.form-control.large {
   letter-spacing: 1px;
 }
 
+.table-header:has(.col-checkbox) {
+  grid-template-columns: 40px 60px 120px 120px 100px 1fr 1fr;
+}
+
+.col-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.col-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #000;
+}
+
 .table-row {
   display: grid;
   grid-template-columns: 60px 120px 120px 100px 1fr 1fr;
@@ -466,6 +483,7 @@ textarea.form-control.large {
   padding: 1.5rem 1rem;
   border-bottom: 1px solid #d1d5db;
   align-items: start;
+  transition: background-color 0.15s ease;
   transition: all 0.15s;
   font-size: 0.875rem;
 }
@@ -476,6 +494,15 @@ textarea.form-control.large {
 
 .table-row:last-child {
   border-bottom: none;
+}
+
+.table-row:has(.col-checkbox) {
+  grid-template-columns: 40px 60px 120px 120px 100px 1fr 1fr;
+}
+
+.table-row-selected {
+  background: #e0f2fe !important;
+  border-left: 4px solid #0284c7;
 }
 
 .table-row-clickable {
@@ -1122,6 +1149,11 @@ textarea.form-control.large {
     gap: 0.5rem;
     padding: 1rem 0.5rem;
     font-size: 0.75rem;
+  }
+
+  .table-header:has(.col-checkbox),
+  .table-row:has(.col-checkbox) {
+    grid-template-columns: 35px 50px 100px 100px 80px 180px 180px;
   }
   
   .detalhes-grid {

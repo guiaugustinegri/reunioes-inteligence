@@ -15,6 +15,8 @@ function ReunioesLista() {
   const [filtroStatus, setFiltroStatus] = useState('')
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
+  const [modoSelecao, setModoSelecao] = useState(false)
+  const [reunioesSelecionadas, setReunioesSelecionadas] = useState([])
 
   useEffect(() => {
     carregarDados()
@@ -63,6 +65,70 @@ function ReunioesLista() {
     }
   }
 
+
+  const toggleSelecao = (id) => {
+    if (reunioesSelecionadas.includes(id)) {
+      setReunioesSelecionadas(reunioesSelecionadas.filter(reuniaoId => reuniaoId !== id))
+    } else {
+      setReunioesSelecionadas([...reunioesSelecionadas, id])
+    }
+  }
+
+  const selecionarTodas = () => {
+    if (reunioesSelecionadas.length === reunioesFiltradas.length) {
+      setReunioesSelecionadas([])
+    } else {
+      setReunioesSelecionadas(reunioesFiltradas.map(r => r.id))
+    }
+  }
+
+  const cancelarSelecao = () => {
+    setModoSelecao(false)
+    setReunioesSelecionadas([])
+  }
+
+  const excluirSelecionadas = async () => {
+    if (reunioesSelecionadas.length === 0) {
+      setMessage('Nenhuma reunião selecionada')
+      return
+    }
+
+    const confirmacao = window.confirm(
+      `Tem certeza que deseja excluir ${reunioesSelecionadas.length} ${reunioesSelecionadas.length === 1 ? 'reunião' : 'reuniões'}?`
+    )
+
+    if (!confirmacao) return
+
+    try {
+      setLoading(true)
+
+      // Primeiro excluir os participantes das reuniões
+      const { error: errorParticipantes } = await supabase
+        .from('reuniao_participantes')
+        .delete()
+        .in('reuniao_id', reunioesSelecionadas)
+
+      if (errorParticipantes) throw errorParticipantes
+
+      // Depois excluir as reuniões
+      const { error } = await supabase
+        .from('reunioes')
+        .delete()
+        .in('id', reunioesSelecionadas)
+
+      if (error) throw error
+
+      setMessage(`${reunioesSelecionadas.length} ${reunioesSelecionadas.length === 1 ? 'reunião excluída' : 'reuniões excluídas'} com sucesso!`)
+      setReunioesSelecionadas([])
+      setModoSelecao(false)
+      carregarDados()
+    } catch (error) {
+      console.error('Erro ao excluir reuniões:', error)
+      setMessage('Erro ao excluir reuniões: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const marcarComoTratada = async (id, statusAtual) => {
     const novoStatus = statusAtual === 'tratada' ? 'pendente' : 'tratada'
@@ -135,9 +201,44 @@ function ReunioesLista() {
     <div>
       <div className="page-header">
         <h2>Reuniões</h2>
-        <Link to="/reuniao/nova" className="btn btn-success">
-          Nova Reunião
-        </Link>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          {!modoSelecao ? (
+            <>
+              <button 
+                onClick={() => setModoSelecao(true)} 
+                className="btn btn-primary"
+                disabled={reunioesFiltradas.length === 0}
+              >
+                Selecionar em Massa
+              </button>
+              <Link to="/reuniao/nova" className="btn btn-success">
+                Nova Reunião
+              </Link>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={selecionarTodas} 
+                className="btn btn-primary"
+              >
+                {reunioesSelecionadas.length === reunioesFiltradas.length ? 'Desmarcar Todas' : 'Selecionar Todas'}
+              </button>
+              <button 
+                onClick={excluirSelecionadas} 
+                className="btn btn-danger"
+                disabled={reunioesSelecionadas.length === 0}
+              >
+                Excluir ({reunioesSelecionadas.length})
+              </button>
+              <button 
+                onClick={cancelarSelecao} 
+                className="btn btn-primary"
+              >
+                Cancelar
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {message && (
@@ -239,6 +340,7 @@ function ReunioesLista() {
 
       <div className="table-compact">
         <div className="table-header">
+          {modoSelecao && <div className="col-checkbox"></div>}
           <div className="col-date">Data</div>
           <div className="col-empresa">Empresa</div>
           <div className="col-produto">Produto</div>
@@ -255,9 +357,19 @@ function ReunioesLista() {
           reunioesFiltradas.map(reuniao => (
             <div 
               key={reuniao.id} 
-              className="table-row table-row-clickable"
-              onClick={() => navigate(`/reuniao/detalhes/${reuniao.id}`)}
+              className={`table-row ${!modoSelecao ? 'table-row-clickable' : ''} ${reunioesSelecionadas.includes(reuniao.id) ? 'table-row-selected' : ''}`}
+              onClick={() => !modoSelecao && navigate(`/reuniao/detalhes/${reuniao.id}`)}
             >
+              {modoSelecao && (
+                <div className="col-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={reunioesSelecionadas.includes(reuniao.id)}
+                    onChange={() => toggleSelecao(reuniao.id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
               <div className="col-date">{formatarData(reuniao.data_reuniao)}</div>
               <div className="col-empresa">{reuniao.empresas?.nome || '-'}</div>
               <div className="col-produto">{reuniao.produtos?.nome || '-'}</div>
