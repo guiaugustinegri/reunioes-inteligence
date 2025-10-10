@@ -100,3 +100,4 @@ Esta pasta contém os blueprints de automação do Make.com para setup e manuten
 - ✅ Estrutura inicial do banco
 - ✅ Tabelas principais (empresas, produtos, participantes, reuniões)
 - ✅ Relacionamentos básicos
+

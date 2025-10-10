@@ -43,3 +43,4 @@ Após este backup, será implementada a funcionalidade de **Séries de Reuniões
 - [x] Instruções de rollback documentadas
 - [x] Arquivos organizados em pasta dedicada
 - [ ] Implementação de séries (próximo passo)
+

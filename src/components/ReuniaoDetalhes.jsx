@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../services/supabase'
+import { seriesService } from '../services/seriesService'
 import emailjs from '@emailjs/browser'
 import { EMAILJS_CONFIG } from '../config/emailjs'
 
@@ -9,6 +10,7 @@ function ReuniaoDetalhes() {
   const navigate = useNavigate()
   const [reuniao, setReuniao] = useState(null)
   const [participantes, setParticipantes] = useState([])
+  const [serie, setSerie] = useState(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [isEditingIA, setIsEditingIA] = useState(false)
@@ -34,7 +36,8 @@ function ReuniaoDetalhes() {
         .select(`
           *,
           empresas!reunioes_empresa_id_fkey(nome),
-          produtos!reunioes_produto_id_fkey(nome)
+          produtos!reunioes_produto_id_fkey(nome),
+          series_reunioes!reunioes_serie_id_fkey(id, nome, visivel_cliente)
         `)
         .eq('id', id)
         .single()
@@ -43,6 +46,14 @@ function ReuniaoDetalhes() {
 
       setReuniao(reuniaoData)
       setEditedIA(reuniaoData.resumo_ia || '')
+
+      // Se a reunião pertence a uma série, carregar dados da série
+      if (reuniaoData.serie_id) {
+        const { data: serieData, error: serieError } = await seriesService.obterSerieComReunioes(reuniaoData.serie_id)
+        if (!serieError && serieData) {
+          setSerie(serieData)
+        }
+      }
 
       // Carregar participantes da reunião
       const { data: participantesData, error: participantesError } = await supabase
@@ -428,8 +439,84 @@ function ReuniaoDetalhes() {
               <label>Produto:</label>
               <div className="detalhe-valor">{reuniao.produtos?.nome || '-'}</div>
             </div>
+            {reuniao.series_reunioes && (
+              <div className="detalhe-item">
+                <label>Série/Projeto:</label>
+                <div className="detalhe-valor">
+                  <span className="serie-badge">
+                    📋 {reuniao.series_reunioes.nome}
+                    {reuniao.series_reunioes.visivel_cliente && ' (Cliente)'}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Card de Contexto da Série */}
+        {serie && (
+          <div className="detalhes-card serie-contexto">
+            <div className="detalhes-header">
+              <h3>Contexto da Série</h3>
+              <Link 
+                to={`/series/${serie.serie.id}`}
+                className="btn btn-primary btn-sm"
+              >
+                VER ATA COMPLETA
+              </Link>
+            </div>
+            
+            <div className="serie-info">
+              <div className="serie-meta">
+                <span><strong>Projeto:</strong> {serie.serie.nome}</span>
+                {serie.serie.empresa_nome && (
+                  <span><strong>Empresa:</strong> {serie.serie.empresa_nome}</span>
+                )}
+                {serie.serie.produto_nome && (
+                  <span><strong>Produto:</strong> {serie.serie.produto_nome}</span>
+                )}
+                <span><strong>Total de reuniões:</strong> {serie.reunioes?.length || 0}</span>
+              </div>
+              
+              {serie.reunioes && serie.reunioes.length > 1 && (
+                <div className="serie-timeline">
+                  <h4>Outras reuniões desta série:</h4>
+                  <div className="timeline-mini">
+                    {serie.reunioes
+                      .filter(r => r.id !== reuniao.id)
+                      .slice(0, 3)
+                      .map((reuniaoSerie, index) => (
+                        <div key={reuniaoSerie.id} className="timeline-item-mini">
+                          <div className="timeline-date">
+                            {new Date(reuniaoSerie.data_reuniao).toLocaleDateString('pt-BR')}
+                          </div>
+                          <div className="timeline-content">
+                            <strong>{reuniaoSerie.titulo_original}</strong>
+                            {reuniaoSerie.resumo_ultra_conciso && (
+                              <p>{reuniaoSerie.resumo_ultra_conciso}</p>
+                            )}
+                          </div>
+                          <Link 
+                            to={`/reuniao/detalhes/${reuniaoSerie.id}`}
+                            className="btn btn-primary btn-xs"
+                          >
+                            VER
+                          </Link>
+                        </div>
+                      ))}
+                    {serie.reunioes.length > 4 && (
+                      <div className="timeline-more">
+                        <Link to={`/series/${serie.serie.id}`}>
+                          Ver todas as {serie.reunioes.length} reuniões desta série →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Card de Resumo IA - Movido para o topo */}
         {reuniao.resumo_ia && (

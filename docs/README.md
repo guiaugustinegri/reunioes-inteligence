@@ -34,3 +34,4 @@ O arquivo `.cursorrules` na raiz do projeto contém as regras essenciais do desi
 - Mantenha a documentação sempre atualizada
 - Adicione novos arquivos conforme necessário
 - Use markdown para formatação consistente
+

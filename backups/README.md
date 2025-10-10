@@ -74,3 +74,4 @@ Antes de implementar mudanças grandes:
 - **Próximo**: Após implementação completa das Séries de Reuniões
 - **Futuro**: Antes de cada funcionalidade major
 - **Automático**: Considerar automação via Make.com
+

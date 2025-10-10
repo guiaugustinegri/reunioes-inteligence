@@ -126,45 +126,6 @@ Antes de criar qualquer componente, verifique:
 - Use async/await para operações assíncronas
 - Sempre trate erros com try/catch
 
-## 📚 Documentação Obrigatória
-
-### README.md - Sempre Atualizado
-**REGRA CRÍTICA**: Sempre que implementar novas funcionalidades, modificar estrutura ou adicionar tecnologias, DEVE atualizar o README.md:
-
-- ✅ **Funcionalidades**: Adicionar novas funcionalidades na seção apropriada
-- ✅ **Tecnologias**: Atualizar lista de tecnologias utilizadas
-- ✅ **Estrutura do Banco**: Adicionar novas tabelas e campos
-- ✅ **Navegação**: Incluir novas rotas e páginas
-- ✅ **Estrutura do Projeto**: Atualizar organização de pastas
-- ✅ **Próximos Passos**: Mover itens de "Em Desenvolvimento" para "Concluído"
-- ✅ **Características**: Adicionar novos recursos implementados
-
-### Checklist de Atualização do README
-Antes de finalizar qualquer implementação:
-
-- [ ] Funcionalidade adicionada na seção correta
-- [ ] Tecnologias atualizadas (se aplicável)
-- [ ] Estrutura do banco reflete mudanças
-- [ ] Rotas de navegação atualizadas
-- [ ] Estrutura de pastas documentada
-- [ ] Próximos passos reorganizados
-- [ ] Características atualizadas
-- [ ] Exemplos de uso (se necessário)
-
-### Organização da Documentação
-- **README.md**: Documentação principal do projeto (sempre atualizada)
-- **docs/**: Documentação técnica detalhada
-- **backups/**: Backups organizados com documentação própria
-- **.cursorrules**: Regras para Cursor AI (incluindo esta regra de documentação)
-
-### Regra de Manutenção
-**SEMPRE** que implementar algo novo:
-1. Implementar a funcionalidade
-2. Atualizar README.md imediatamente
-3. Atualizar documentação em docs/ se necessário
-4. Criar backup se for mudança significativa
-5. Atualizar .cursorrules se necessário
-
 ## 🎯 Objetivo do Projeto
 
 Sistema para gerenciar reuniões com:

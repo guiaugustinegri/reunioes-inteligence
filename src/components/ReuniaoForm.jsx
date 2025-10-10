@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
+import { seriesService } from '../services/seriesService'
 
 function ReuniaoForm() {
   const { id } = useParams()
@@ -17,12 +18,14 @@ function ReuniaoForm() {
     transcricao_completa: '',
     empresa_id: '',
     produto_id: '',
+    serie_id: '',
     status: 'pendente',
     participantes: []
   })
 
   const [empresas, setEmpresas] = useState([])
   const [produtos, setProdutos] = useState([])
+  const [series, setSeries] = useState([])
   const [participantes, setParticipantes] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -60,8 +63,13 @@ function ReuniaoForm() {
 
       if (participantesError) throw participantesError
 
+      // Carregar séries
+      const { data: seriesData, error: seriesError } = await seriesService.listarSeriesCompletas()
+      if (seriesError) throw seriesError
+
       setEmpresas(empresasData || [])
       setProdutos(produtosData || [])
+      setSeries(seriesData || [])
       setParticipantes(participantesData || [])
 
       // Se está editando, carregar dados da reunião
@@ -86,6 +94,7 @@ function ReuniaoForm() {
             transcricao_completa: reuniaoData.transcricao_completa || '',
             empresa_id: reuniaoData.empresa_id || '',
             produto_id: reuniaoData.produto_id || '',
+            serie_id: reuniaoData.serie_id || '',
             status: reuniaoData.status || 'pendente',
             participantes: []
           })
@@ -154,6 +163,7 @@ function ReuniaoForm() {
         transcricao_completa: formData.transcricao_completa,
         empresa_id: formData.empresa_id || null,
         produto_id: formData.produto_id || null,
+        serie_id: formData.serie_id || null,
         status: formData.status
       }
 
@@ -302,6 +312,24 @@ function ReuniaoForm() {
             {produtosFiltrados.map(produto => (
               <option key={produto.id} value={produto.id}>
                 {produto.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="serie_id">Série/Projeto:</label>
+          <select
+            id="serie_id"
+            name="serie_id"
+            className="form-control"
+            value={formData.serie_id}
+            onChange={handleInputChange}
+          >
+            <option value="">Nenhuma série</option>
+            {series.map(serie => (
+              <option key={serie.id} value={serie.id}>
+                {serie.nome} {serie.visivel_cliente && '(Cliente)'}
               </option>
             ))}
           </select>
