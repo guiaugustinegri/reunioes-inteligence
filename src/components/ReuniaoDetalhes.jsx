@@ -230,12 +230,90 @@ function ReuniaoDetalhes() {
     try {
       const conteudo = document.getElementById('resumo-ia-content').innerHTML
       
-      // Cria um elemento temporário para converter HTML para texto formatado
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = conteudo
+      // Função para converter HTML para Markdown compatível com Notion
+      const htmlToMarkdown = (html) => {
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = html
+        
+        // Remove scripts e styles
+        const scripts = tempDiv.querySelectorAll('script, style')
+        scripts.forEach(el => el.remove())
+        
+        let markdown = ''
+        
+        // Processa cada elemento
+        const processElement = (element) => {
+          if (element.nodeType === Node.TEXT_NODE) {
+            return element.textContent || ''
+          }
+          
+          if (element.nodeType !== Node.ELEMENT_NODE) {
+            return ''
+          }
+          
+          const tagName = element.tagName.toLowerCase()
+          const text = Array.from(element.childNodes).map(processElement).join('')
+          
+          switch (tagName) {
+            case 'h1':
+              return `# ${text}\n\n`
+            case 'h2':
+              return `## ${text}\n\n`
+            case 'h3':
+              return `### ${text}\n\n`
+            case 'h4':
+              return `#### ${text}\n\n`
+            case 'h5':
+              return `##### ${text}\n\n`
+            case 'h6':
+              return `###### ${text}\n\n`
+            case 'p':
+              return `${text}\n\n`
+            case 'strong':
+            case 'b':
+              return `**${text}**`
+            case 'em':
+            case 'i':
+              return `*${text}*`
+            case 'ul':
+              return `${text}\n`
+            case 'ol':
+              return `${text}\n`
+            case 'li':
+              const parent = element.parentElement
+              if (parent && parent.tagName.toLowerCase() === 'ol') {
+                const index = Array.from(parent.children).indexOf(element) + 1
+                return `${index}. ${text}\n`
+              } else {
+                return `• ${text}\n`
+              }
+            case 'br':
+              return '\n'
+            case 'hr':
+              return '---\n\n'
+            case 'blockquote':
+              return `> ${text}\n\n`
+            case 'code':
+              return `\`${text}\``
+            case 'pre':
+              return `\`\`\`\n${text}\n\`\`\`\n\n`
+            case 'a':
+              const href = element.getAttribute('href')
+              return href ? `[${text}](${href})` : text
+            case 'img':
+              const src = element.getAttribute('src')
+              const alt = element.getAttribute('alt') || ''
+              return src ? `![${alt}](${src})` : ''
+            default:
+              return text
+          }
+        }
+        
+        return processElement(tempDiv).trim()
+      }
       
-      // Converte HTML para texto mantendo formatação básica
-      let textoFormatado = tempDiv.innerText || tempDiv.textContent || ''
+      // Converte HTML para Markdown
+      const markdownContent = htmlToMarkdown(conteudo)
       
       // Adiciona cabeçalho com informações da reunião
       const cabecalho = `# ${reuniao.titulo_original || 'Reunião'}\n\n`
@@ -245,7 +323,7 @@ function ReuniaoDetalhes() {
         reuniao.data_reuniao && `**Data:** ${new Date(reuniao.data_reuniao).toLocaleDateString('pt-BR')}`
       ].filter(Boolean).join('\n')
       
-      const conteudoCompleto = cabecalho + (metaInfo ? metaInfo + '\n\n' : '') + textoFormatado
+      const conteudoCompleto = cabecalho + (metaInfo ? metaInfo + '\n\n' : '') + markdownContent
       
       // Usa a API moderna de clipboard
       if (navigator.clipboard && window.isSecureContext) {
@@ -264,7 +342,7 @@ function ReuniaoDetalhes() {
         textArea.remove()
       }
       
-      setMessage('Conteúdo copiado para a área de transferência!')
+      setMessage('Conteúdo copiado em formato Markdown para Notion!')
       
       // Remove a mensagem após 3 segundos
       setTimeout(() => {
@@ -279,11 +357,13 @@ function ReuniaoDetalhes() {
 
   const formatarData = (data) => {
     if (!data) return '-'
-    return new Date(data).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
+    // Criar a data considerando apenas a parte da data, ignorando timezone
+    const dataObj = new Date(data)
+    // Usar UTC para evitar problemas de timezone
+    const dia = dataObj.getUTCDate().toString().padStart(2, '0')
+    const mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, '0')
+    const ano = dataObj.getUTCFullYear()
+    return `${dia}/${mes}/${ano}`
   }
 
   if (loading) {
@@ -364,7 +444,7 @@ function ReuniaoDetalhes() {
                       onClick={() => setIsEditingIA(true)}
                       title="Editar Resumo IA"
                     >
-                      Editar
+                      Editar Resumo IA
                     </button>
                     <button 
                       className="btn btn-warning btn-sm"

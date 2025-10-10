@@ -146,7 +146,7 @@ function ReuniaoForm() {
     try {
       const reuniaoData = {
         titulo_original: formData.titulo_original,
-        data_reuniao: formData.data_reuniao ? new Date(formData.data_reuniao).toISOString() : null,
+        data_reuniao: formData.data_reuniao ? `${formData.data_reuniao}T00:00:00.000Z` : null,
         resumo_ultra_conciso: formData.resumo_ultra_conciso,
         resumo_conciso: formData.resumo_conciso,
         resumo_ia: formData.resumo_ia,

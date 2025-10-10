@@ -1189,3 +1189,231 @@ textarea.form-control.large {
     flex: 1;
   }
 }
+
+/* Estilos específicos para página de Custos LLM */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: white;
+  border: 2px solid #000;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.stat-card h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.custos-table {
+  margin-top: 1rem;
+}
+
+.custos-table .col-date {
+  width: 100px;
+}
+
+.custos-table .col-reuniao {
+  width: 250px;
+}
+
+.custos-table .col-request {
+  width: 200px;
+}
+
+.custos-table .col-custo {
+  width: 120px;
+  text-align: right;
+}
+
+.reuniao-titulo {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.reuniao-meta {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.request-info {
+  font-size: 0.875rem;
+}
+
+.request-modelo {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.request-tokens {
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.request-custo {
+  font-weight: 600;
+  color: #059669;
+}
+
+.custo-total {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #059669;
+}
+
+.no-data {
+  color: #999;
+  font-style: italic;
+}
+
+/* Modal de Configuração de Preços */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.config-precos-modal {
+  background: white;
+  border: 3px solid #000;
+  box-shadow: 8px 8px 0 #000;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 2px solid #000;
+  background: #f9fafb;
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: #e5e7eb;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.precos-section h4,
+.novo-modelo-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.precos-list {
+  margin-bottom: 2rem;
+}
+
+.preco-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  margin-bottom: 0.5rem;
+  background: #f9fafb;
+}
+
+.preco-item label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+  color: #374151;
+}
+
+.novo-modelo-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+  padding: 1rem;
+  border: 2px dashed #d1d5db;
+  background: #f9fafb;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 2px solid #000;
+  background: #f9fafb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsividade para Custos LLM */
+@media (max-width: 768px) {
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .preco-item,
+  .novo-modelo-form {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .config-precos-modal {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .custos-table .col-reuniao {
+    width: 200px;
+  }
+  
+  .custos-table .col-request {
+    width: 150px;
+  }
+}

@@ -155,7 +155,12 @@ function ReunioesLista() {
 
   const formatarData = (data) => {
     if (!data) return '-'
-    return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+    // Criar a data considerando apenas a parte da data, ignorando timezone
+    const dataObj = new Date(data)
+    // Usar UTC para evitar problemas de timezone
+    const dia = dataObj.getUTCDate().toString().padStart(2, '0')
+    const mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, '0')
+    return `${dia}/${mes}`
   }
 
   const reunioesFiltradas = reunioes.filter(reuniao => {

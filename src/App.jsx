@@ -5,6 +5,7 @@ import ReuniaoForm from './components/ReuniaoForm'
 import ReuniaoDetalhes from './components/ReuniaoDetalhes'
 import ResumoIA from './components/ResumoIA'
 import Gerenciar from './components/Gerenciar'
+import CustosLLM from './components/CustosLLM'
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
             <h1>Painel de Reuniões</h1>
             <div className="nav-links">
               <Link to="/" className="nav-link">Reuniões</Link>
+              <Link to="/custos-llm" className="nav-link">Custos LLM</Link>
               <Link to="/gerenciar" className="nav-link">Gerenciar</Link>
             </div>
           </div>
@@ -28,6 +30,7 @@ function App() {
             <Route path="/reuniao/detalhes/:id" element={<ReuniaoDetalhes />} />
             <Route path="/reuniao/:id" element={<ReuniaoForm />} />
             <Route path="/resumo-ia/:id" element={<ResumoIA />} />
+            <Route path="/custos-llm" element={<CustosLLM />} />
             <Route path="/gerenciar" element={<Gerenciar />} />
           </Routes>
         </main>
