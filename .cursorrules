@@ -1,0 +1,179 @@
+# Cursor Rules - Banco de Reuniões
+
+## 🎨 Design System Obrigatório
+
+Este projeto segue um sistema de design específico inspirado em jornais clássicos e interfaces Windows antigas. **SEMPRE** siga estas regras:
+
+### Paleta de Cores (OBRIGATÓRIO)
+- **Preto Principal**: `#000` - Bordas, headers, texto principal
+- **Branco**: `#fff` - Backgrounds, texto em fundos escuros  
+- **Cinza Escuro**: `#111827` - Texto secundário
+- **Cinza Médio**: `#6b7280` - Texto terciário, labels
+- **Cinza Claro**: `#d1d5db` - Bordas secundárias
+- **Cinza Muito Claro**: `#f9fafb` - Hover states
+- **Background**: `#e5e7eb` - Fundo da página
+
+### Tipografia (OBRIGATÓRIO)
+```css
+font-family: 'Courier New', 'Consolas', monospace, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+```
+
+### Componentes Padrão
+
+#### Botões
+```jsx
+// Botão Primário (branco com borda preta)
+<button className="btn btn-primary">TEXTO</button>
+
+// Botão Success (preto)
+<button className="btn btn-success">TEXTO</button>
+```
+
+#### Formulários
+```jsx
+<div className="form-group">
+  <label htmlFor="campo">LABEL</label>
+  <input type="text" id="campo" className="form-control" />
+</div>
+
+<select className="select-filter">
+  <option value="">Selecione...</option>
+</select>
+```
+
+#### Tabelas (Estilo Jornal)
+```jsx
+<div className="table-compact">
+  <div className="table-header">
+    <div className="col-name">COLUNA 1</div>
+    <div className="col-name">COLUNA 2</div>
+  </div>
+  <div className="table-row">
+    <div className="col-name">Dado 1</div>
+    <div className="col-name">Dado 2</div>
+  </div>
+</div>
+```
+
+### Regras de Estilo (OBRIGATÓRIAS)
+
+1. **Bordas**: Sempre use `border: 2px solid #000` em containers principais
+2. **Títulos**: Sempre use `text-transform: uppercase` e `letter-spacing: 2px`
+3. **Labels**: Sempre use `text-transform: uppercase` e `letter-spacing: 1px`
+4. **Hover**: Sempre inverta cores (preto ↔ branco)
+5. **Espaçamento**: Use o sistema: XS(8px), SM(12px), MD(16px), LG(24px), XL(32px)
+
+### Estados Interativos
+```css
+/* Hover obrigatório */
+.btn:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.nav-link:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+```
+
+## 🚫 Proibições
+
+- **NUNCA** use cores que não estejam na paleta definida
+- **NUNCA** use fontes diferentes de Courier New/Consolas
+- **NUNCA** crie componentes sem bordas pretas de 2px
+- **NUNCA** use títulos sem uppercase
+- **NUNCA** adicione elementos decorativos desnecessários
+
+## ✅ Checklist Obrigatório
+
+Antes de criar qualquer componente, verifique:
+
+- [ ] Usa apenas preto, branco e tons de cinza
+- [ ] Aplica bordas de 2px em containers principais
+- [ ] Usa text-transform: uppercase em títulos e labels
+- [ ] Adiciona letter-spacing apropriado
+- [ ] Implementa estados hover com inversão preto/branco
+- [ ] Garante alto contraste para acessibilidade
+- [ ] Usa a fonte Courier New ou Consolas
+- [ ] Mantém consistência com componentes existentes
+
+## 📁 Estrutura do Projeto
+
+- `src/components/` - Componentes React
+- `src/services/` - Lógica de negócio e API calls
+- `docs/` - Documentação (Design System, Backlog, etc.)
+- `backups/` - Backups organizados por data
+- `database/` - Scripts SQL
+
+## 🔧 Tecnologias
+
+- **Frontend**: React + Vite
+- **Backend**: Supabase (PostgreSQL)
+- **Estilização**: CSS puro (sem frameworks)
+- **Roteamento**: React Router
+
+## 📋 Padrões de Código
+
+- Use `const` e `let` (evite `var`)
+- Use arrow functions para callbacks
+- Use template literals para strings
+- Use destructuring quando apropriado
+- Use async/await para operações assíncronas
+- Sempre trate erros com try/catch
+
+## 📚 Documentação Obrigatória
+
+### README.md - Sempre Atualizado
+**REGRA CRÍTICA**: Sempre que implementar novas funcionalidades, modificar estrutura ou adicionar tecnologias, DEVE atualizar o README.md:
+
+- ✅ **Funcionalidades**: Adicionar novas funcionalidades na seção apropriada
+- ✅ **Tecnologias**: Atualizar lista de tecnologias utilizadas
+- ✅ **Estrutura do Banco**: Adicionar novas tabelas e campos
+- ✅ **Navegação**: Incluir novas rotas e páginas
+- ✅ **Estrutura do Projeto**: Atualizar organização de pastas
+- ✅ **Próximos Passos**: Mover itens de "Em Desenvolvimento" para "Concluído"
+- ✅ **Características**: Adicionar novos recursos implementados
+
+### Checklist de Atualização do README
+Antes de finalizar qualquer implementação:
+
+- [ ] Funcionalidade adicionada na seção correta
+- [ ] Tecnologias atualizadas (se aplicável)
+- [ ] Estrutura do banco reflete mudanças
+- [ ] Rotas de navegação atualizadas
+- [ ] Estrutura de pastas documentada
+- [ ] Próximos passos reorganizados
+- [ ] Características atualizadas
+- [ ] Exemplos de uso (se necessário)
+
+### Organização da Documentação
+- **README.md**: Documentação principal do projeto (sempre atualizada)
+- **docs/**: Documentação técnica detalhada
+- **backups/**: Backups organizados com documentação própria
+- **.cursorrules**: Regras para Cursor AI (incluindo esta regra de documentação)
+
+### Regra de Manutenção
+**SEMPRE** que implementar algo novo:
+1. Implementar a funcionalidade
+2. Atualizar README.md imediatamente
+3. Atualizar documentação em docs/ se necessário
+4. Criar backup se for mudança significativa
+5. Atualizar .cursorrules se necessário
+
+## 🎯 Objetivo do Projeto
+
+Sistema para gerenciar reuniões com:
+- Resumos automáticos via LLM
+- Agrupamento em séries/projetos
+- Análise de progressão
+- Compartilhamento com clientes
+- Visual de "ata contínua" profissional
+
+---
+
+**IMPORTANTE**: Este design system é OBRIGATÓRIO. Todos os componentes devem seguir exatamente estas regras para manter a consistência visual do projeto.

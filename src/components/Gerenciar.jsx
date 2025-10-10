@@ -53,6 +53,7 @@ function EmpresasManager({ onMessage }) {
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ id: null, nome: '', descricao: '' })
   const [isEditing, setIsEditing] = useState(false)
+  const [isFormExpanded, setIsFormExpanded] = useState(false)
 
   useEffect(() => {
     carregarEmpresas()
@@ -99,6 +100,7 @@ function EmpresasManager({ onMessage }) {
 
       setFormData({ id: null, nome: '', descricao: '' })
       setIsEditing(false)
+      setIsFormExpanded(false)
       carregarEmpresas()
     } catch (error) {
       console.error('Erro ao salvar empresa:', error)
@@ -109,12 +111,14 @@ function EmpresasManager({ onMessage }) {
   const editarEmpresa = (empresa) => {
     setFormData({ id: empresa.id, nome: empresa.nome, descricao: empresa.descricao || '' })
     setIsEditing(true)
+    setIsFormExpanded(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const cancelarEdicao = () => {
     setFormData({ id: null, nome: '', descricao: '' })
     setIsEditing(false)
+    setIsFormExpanded(false)
   }
 
   const excluirEmpresa = async (id) => {
@@ -143,8 +147,18 @@ function EmpresasManager({ onMessage }) {
   return (
     <div>
       <div className="form-container">
-        <h3>{isEditing ? 'Editar Empresa' : 'Adicionar Nova Empresa'}</h3>
-        <form onSubmit={handleSubmit}>
+        <div className="form-header">
+          <h3>{isEditing ? 'Editar Empresa' : 'Adicionar Nova Empresa'}</h3>
+          <button 
+            type="button" 
+            className="btn btn-primary btn-toggle"
+            onClick={() => setIsFormExpanded(!isFormExpanded)}
+          >
+            {isFormExpanded ? '−' : '+'}
+          </button>
+        </div>
+        {isFormExpanded && (
+          <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome">Nome:</label>
             <input
@@ -176,6 +190,7 @@ function EmpresasManager({ onMessage }) {
             )}
           </div>
         </form>
+        )}
       </div>
 
       <div className="table-container">
@@ -232,6 +247,7 @@ function ProdutosManager({ onMessage }) {
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ id: null, nome: '', descricao: '', empresa_id: '' })
   const [isEditing, setIsEditing] = useState(false)
+  const [isFormExpanded, setIsFormExpanded] = useState(false)
 
   useEffect(() => {
     carregarDados()
@@ -281,6 +297,7 @@ function ProdutosManager({ onMessage }) {
 
       setFormData({ id: null, nome: '', descricao: '', empresa_id: '' })
       setIsEditing(false)
+      setIsFormExpanded(false)
       carregarDados()
     } catch (error) {
       console.error('Erro ao salvar produto:', error)
@@ -296,12 +313,14 @@ function ProdutosManager({ onMessage }) {
       empresa_id: produto.empresa_id || '' 
     })
     setIsEditing(true)
+    setIsFormExpanded(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const cancelarEdicao = () => {
     setFormData({ id: null, nome: '', descricao: '', empresa_id: '' })
     setIsEditing(false)
+    setIsFormExpanded(false)
   }
 
   const excluirProduto = async (id) => {
@@ -330,8 +349,18 @@ function ProdutosManager({ onMessage }) {
   return (
     <div>
       <div className="form-container">
-        <h3>{isEditing ? 'Editar Produto' : 'Adicionar Novo Produto'}</h3>
-        <form onSubmit={handleSubmit}>
+        <div className="form-header">
+          <h3>{isEditing ? 'Editar Produto' : 'Adicionar Novo Produto'}</h3>
+          <button 
+            type="button" 
+            className="btn btn-primary btn-toggle"
+            onClick={() => setIsFormExpanded(!isFormExpanded)}
+          >
+            {isFormExpanded ? '−' : '+'}
+          </button>
+        </div>
+        {isFormExpanded && (
+          <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome">Nome:</label>
             <input
@@ -380,6 +409,7 @@ function ProdutosManager({ onMessage }) {
             )}
           </div>
         </form>
+        )}
       </div>
 
       <div className="table-container">
@@ -437,6 +467,7 @@ function ParticipantesManager({ onMessage }) {
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ id: null, nome: '', email: '' })
   const [isEditing, setIsEditing] = useState(false)
+  const [isFormExpanded, setIsFormExpanded] = useState(false)
 
   useEffect(() => {
     carregarParticipantes()
@@ -483,6 +514,7 @@ function ParticipantesManager({ onMessage }) {
 
       setFormData({ id: null, nome: '', email: '' })
       setIsEditing(false)
+      setIsFormExpanded(false)
       carregarParticipantes()
     } catch (error) {
       console.error('Erro ao salvar participante:', error)
@@ -493,12 +525,14 @@ function ParticipantesManager({ onMessage }) {
   const editarParticipante = (participante) => {
     setFormData({ id: participante.id, nome: participante.nome, email: participante.email || '' })
     setIsEditing(true)
+    setIsFormExpanded(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const cancelarEdicao = () => {
     setFormData({ id: null, nome: '', email: '' })
     setIsEditing(false)
+    setIsFormExpanded(false)
   }
 
   const excluirParticipante = async (id) => {
@@ -527,8 +561,18 @@ function ParticipantesManager({ onMessage }) {
   return (
     <div>
       <div className="form-container">
-        <h3>{isEditing ? 'Editar Participante' : 'Adicionar Novo Participante'}</h3>
-        <form onSubmit={handleSubmit}>
+        <div className="form-header">
+          <h3>{isEditing ? 'Editar Participante' : 'Adicionar Novo Participante'}</h3>
+          <button 
+            type="button" 
+            className="btn btn-primary btn-toggle"
+            onClick={() => setIsFormExpanded(!isFormExpanded)}
+          >
+            {isFormExpanded ? '−' : '+'}
+          </button>
+        </div>
+        {isFormExpanded && (
+          <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nome">Nome:</label>
             <input
@@ -561,6 +605,7 @@ function ParticipantesManager({ onMessage }) {
             )}
           </div>
         </form>
+        )}
       </div>
 
       <div className="table-container">
