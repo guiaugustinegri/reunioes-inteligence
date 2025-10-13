@@ -19,10 +19,29 @@ function ReuniaoDetalhes() {
     assunto: '',
     showEmailForm: false
   })
+  const [participantesEmpresa, setParticipantesEmpresa] = useState([])
+  const [emailsDestinatarios, setEmailsDestinatarios] = useState([]) // Array de strings de emails
+  const [historicoEmails, setHistoricoEmails] = useState([]) // Histórico de envios
 
   useEffect(() => {
     carregarReuniao()
+    carregarHistoricoEmails()
   }, [id])
+
+  const carregarHistoricoEmails = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('email_envios')
+        .select('*')
+        .eq('reuniao_id', id)
+        .order('enviado_em', { ascending: false })
+
+      if (error) throw error
+      setHistoricoEmails(data || [])
+    } catch (error) {
+      console.error('Erro ao carregar histórico de emails:', error)
+    }
+  }
 
   const carregarReuniao = async () => {
     try {
@@ -33,7 +52,7 @@ function ReuniaoDetalhes() {
         .from('reunioes')
         .select(`
           *,
-          empresas!reunioes_empresa_id_fkey(nome),
+          empresas!reunioes_empresa_id_fkey(id, nome),
           produtos!reunioes_produto_id_fkey(nome),
           series_reunioes!reunioes_serie_id_fkey(id, nome, visivel_cliente)
         `)
@@ -56,7 +75,25 @@ function ReuniaoDetalhes() {
 
       if (participantesError) throw participantesError
 
-      setParticipantes(participantesData?.map(p => p.participantes) || [])
+      const participantesReuniao = participantesData?.map(p => p.participantes) || []
+      setParticipantes(participantesReuniao)
+
+      // Carregar participantes do produto (se houver)
+      if (reuniaoData.produto_id) {
+        const { data: produtoParticipantesData, error: produtoError } = await supabase
+          .from('produto_participantes')
+          .select(`
+            participantes!produto_participantes_participante_id_fkey(id, nome, email)
+          `)
+          .eq('produto_id', reuniaoData.produto_id)
+
+        if (produtoError) {
+          console.error('Erro ao carregar participantes do produto:', produtoError)
+        } else {
+          const participantesProd = produtoParticipantesData?.map(p => p.participantes) || []
+          setParticipantesEmpresa(participantesProd)
+        }
+      }
     } catch (error) {
       console.error('Erro ao carregar reunião:', error)
       setMessage('Erro ao carregar reunião: ' + error.message)
@@ -201,28 +238,145 @@ function ReuniaoDetalhes() {
     }, 250)
   }
 
+  const adicionarEmail = (email) => {
+    if (!email || !email.trim()) return
+    const emailLimpo = email.trim().toLowerCase()
+    
+    // Validação básica de email
+    if (!emailLimpo.includes('@')) {
+      setMessage('Email inválido!')
+      return
+    }
+    
+    // Não adicionar duplicados
+    if (emailsDestinatarios.includes(emailLimpo)) {
+      setMessage('Email já está na lista!')
+      return
+    }
+    
+    setEmailsDestinatarios([...emailsDestinatarios, emailLimpo])
+    setEmailData({ ...emailData, destinatario: '' }) // Limpar campo
+  }
+
+  const removerEmail = (email) => {
+    setEmailsDestinatarios(emailsDestinatarios.filter(e => e !== email))
+  }
+
+  const adicionarParticipantesReuniao = () => {
+    const emailsParticipantes = participantes
+      .filter(p => p.email && !p.nome.toLowerCase().includes('guilherme'))
+      .map(p => p.email.toLowerCase())
+    
+    const novosEmails = [...new Set([...emailsDestinatarios, ...emailsParticipantes])]
+    setEmailsDestinatarios(novosEmails)
+    setMessage(`${emailsParticipantes.length} email(s) adicionado(s) dos participantes da reunião!`)
+  }
+
+  const adicionarParticipantesEmpresa = () => {
+    const emailsProduto = participantesEmpresa
+      .filter(p => p.email && !p.nome.toLowerCase().includes('guilherme'))
+      .map(p => p.email.toLowerCase())
+    
+    const novosEmails = [...new Set([...emailsDestinatarios, ...emailsProduto])]
+    setEmailsDestinatarios(novosEmails)
+    setMessage(`${emailsProduto.length} email(s) adicionado(s) dos participantes do produto!`)
+  }
+
   const enviarEmail = async () => {
     try {
-      setSaving(true)
-      setMessage('Enviando e-mail...')
-
-      const { SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY } = EMAILJS_CONFIG
-
-      const templateParams = {
-        to_email: emailData.destinatario,
-        subject: emailData.assunto || `Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`,
-        message: document.getElementById('resumo-ia-content').innerHTML,
-        from_name: 'Sistema de Reuniões'
+      if (emailsDestinatarios.length === 0) {
+        setMessage('Adicione pelo menos um destinatário!')
+        return
       }
 
-      const result = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      // Verificar se já foi enviado antes
+      if (historicoEmails.length > 0) {
+        const ultimoEnvio = historicoEmails[0]
+        const dataEnvio = new Date(ultimoEnvio.enviado_em).toLocaleString('pt-BR')
+        
+        const confirmar = window.confirm(
+          `⚠️ ATENÇÃO: Email já foi enviado anteriormente!\n\n` +
+          `Último envio: ${dataEnvio}\n` +
+          `Destinatários: ${ultimoEnvio.destinatarios.length} pessoa(s)\n\n` +
+          `Deseja realmente REENVIAR o email?`
+        )
+        
+        if (!confirmar) {
+          setMessage('Envio cancelado.')
+          return
+        }
+      }
+
+      setSaving(true)
+      setMessage('Enviando e-mails...')
+
+      const { SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY } = EMAILJS_CONFIG
+      const conteudoHTML = document.getElementById('resumo-ia-content').innerHTML
+      const assuntoEmail = emailData.assunto || `Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`
+
+      // Enviar para cada destinatário
+      let enviados = 0
+      let erros = 0
+
+      for (const email of emailsDestinatarios) {
+        try {
+          const templateParams = {
+            to_email: email,
+            subject: assuntoEmail,
+            message: conteudoHTML,
+            from_name: 'Sistema de Reuniões'
+          }
+
+          console.log('📧 Enviando email para:', email)
+          console.log('📋 Template params:', templateParams)
+
+          await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+          console.log('✅ Email enviado com sucesso para:', email)
+          enviados++
+          
+          // Pequeno delay entre envios para não sobrecarregar o serviço
+          await new Promise(resolve => setTimeout(resolve, 500))
+        } catch (error) {
+          console.error(`Erro ao enviar para ${email}:`, error)
+          erros++
+        }
+      }
       
-      setMessage('E-mail enviado com sucesso!')
-      setEmailData({ ...emailData, showEmailForm: false, destinatario: '', assunto: '' })
+      // Registrar envio no banco de dados
+      if (enviados > 0) {
+        try {
+          const { error: dbError } = await supabase
+            .from('email_envios')
+            .insert({
+              reuniao_id: id,
+              destinatarios: emailsDestinatarios,
+              assunto: assuntoEmail,
+              enviado_por: 'Sistema'
+            })
+
+          if (dbError) {
+            console.error('Erro ao registrar envio:', dbError)
+          } else {
+            // Recarregar histórico
+            carregarHistoricoEmails()
+          }
+        } catch (error) {
+          console.error('Erro ao registrar no banco:', error)
+        }
+      }
+      
+      if (erros === 0) {
+        setMessage(`✅ E-mails enviados com sucesso para ${enviados} destinatário(s)!`)
+      } else {
+        setMessage(`⚠️ ${enviados} e-mail(s) enviado(s) com sucesso. ${erros} erro(s).`)
+      }
+      
+      setEmailData({ ...emailData, showEmailForm: false, assunto: '' })
+      setEmailsDestinatarios([]) // Limpar lista
       
     } catch (error) {
-      console.error('Erro ao enviar e-mail:', error)
-      setMessage('Erro ao enviar e-mail: ' + (error.text || 'Tente novamente.'))
+      console.error('Erro ao enviar e-mails:', error)
+      setMessage('Erro ao enviar e-mails: ' + (error.text || 'Tente novamente.'))
     } finally {
       setSaving(false)
     }
@@ -365,7 +519,7 @@ function ReuniaoDetalhes() {
     const dia = dataObj.getUTCDate().toString().padStart(2, '0')
     const mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, '0')
     const ano = dataObj.getUTCFullYear()
-    return `${dia}/${mes}/${ano}`
+    return `${dia}-${mes}-${ano}`
   }
 
   if (loading) {
@@ -479,10 +633,29 @@ function ReuniaoDetalhes() {
                     </button>
                     <button 
                       className="btn btn-success btn-sm"
-                      onClick={() => setEmailData({ ...emailData, showEmailForm: true })}
-                      title="Enviar Email"
+                      onClick={() => {
+                        // Criar assunto no formato solicitado
+                        const empresa = reuniao.empresas?.nome || ''
+                        const produto = reuniao.produtos?.nome || ''
+                        const data = reuniao.data_reuniao ? formatarData(reuniao.data_reuniao) : ''
+                        const assuntoPadrao = `Ata Reunião ${empresa}${produto ? ' - ' + produto : ''}${data ? ' - ' + data : ''}`
+                        
+                        setEmailData({ 
+                          destinatario: '', 
+                          assunto: assuntoPadrao, 
+                          showEmailForm: true 
+                        })
+                        setEmailsDestinatarios([]) // Começar com lista vazia
+                      }}
+                      title={historicoEmails.length > 0 ? `Email já enviado ${historicoEmails.length}x` : "Enviar Email"}
+                      style={{ position: 'relative' }}
                     >
                       Email
+                      {historicoEmails.length > 0 && (
+                        <span className="email-badge-enviado">
+                          ✓ {historicoEmails.length}
+                        </span>
+                      )}
                     </button>
                   </>
                 ) : (
@@ -513,17 +686,134 @@ function ReuniaoDetalhes() {
             {emailData.showEmailForm && (
               <div className="email-form">
                 <h4>Enviar Resumo por E-mail</h4>
-                <div className="form-group">
-                  <label htmlFor="destinatario">E-mail do destinatário:</label>
-                  <input
-                    type="email"
-                    id="destinatario"
-                    className="form-control"
-                    value={emailData.destinatario}
-                    onChange={(e) => setEmailData({ ...emailData, destinatario: e.target.value })}
-                    placeholder="cliente@exemplo.com"
-                  />
+
+                {/* Histórico de Envios */}
+                {historicoEmails.length > 0 && (
+                  <div className="email-historico-alert">
+                    <strong>⚠️ Email já foi enviado anteriormente!</strong>
+                    <div className="email-historico-resumo">
+                      Último envio: {new Date(historicoEmails[0].enviado_em).toLocaleString('pt-BR')} 
+                      {' '}para {historicoEmails[0].destinatarios.length} pessoa(s)
+                      {historicoEmails.length > 1 && ` • Total de ${historicoEmails.length} envios`}
+                    </div>
+                    <details style={{ marginTop: '0.5rem' }}>
+                      <summary style={{ cursor: 'pointer', fontSize: '0.875rem', color: '#6b7280' }}>
+                        Ver histórico completo
+                      </summary>
+                      <div className="email-historico-lista">
+                        {historicoEmails.map((envio, index) => (
+                          <div key={envio.id} className="email-historico-item">
+                            <div className="historico-numero">#{historicoEmails.length - index}</div>
+                            <div className="historico-info">
+                              <div className="historico-data">
+                                {new Date(envio.enviado_em).toLocaleString('pt-BR')}
+                              </div>
+                              <div className="historico-assunto">{envio.assunto}</div>
+                              <div className="historico-destinatarios">
+                                Para: {envio.destinatarios.join(', ')}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  </div>
+                )}
+                
+                {/* Botões de Ação Rápida */}
+                <div className="email-quick-actions">
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={adicionarParticipantesReuniao}
+                    disabled={participantes.filter(p => p.email && !p.nome.toLowerCase().includes('guilherme')).length === 0}
+                    title={participantes.filter(p => p.email).length > 0 
+                      ? "Adicionar todos os participantes da reunião (exceto Guilherme)" 
+                      : "Nenhum participante com email cadastrado na reunião"
+                    }
+                  >
+                    + Emails da Reunião ({participantes.filter(p => p.email && !p.nome.toLowerCase().includes('guilherme')).length})
+                  </button>
+                  
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={adicionarParticipantesEmpresa}
+                    disabled={participantesEmpresa.filter(p => p.email && !p.nome.toLowerCase().includes('guilherme')).length === 0}
+                    title={participantesEmpresa.filter(p => p.email).length > 0 
+                      ? "Adicionar todos os participantes do produto (exceto Guilherme)" 
+                      : "Nenhum participante cadastrado no produto"
+                    }
+                  >
+                    + Emails do Produto ({participantesEmpresa.filter(p => p.email && !p.nome.toLowerCase().includes('guilherme')).length})
+                  </button>
                 </div>
+                
+                {participantes.filter(p => p.email).length === 0 && (
+                  <div style={{ 
+                    padding: '0.75rem', 
+                    background: '#f9fafb', 
+                    border: '2px solid #d1d5db',
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                    marginBottom: '1rem'
+                  }}>
+                    <strong style={{ color: '#000', display: 'block', marginBottom: '0.25rem' }}>
+                      💡 Dica: Nenhum participante associado à reunião
+                    </strong>
+                    Vá em "Editar Dados Gerais" para associar participantes à reunião,
+                    ou adicione emails manualmente abaixo.
+                  </div>
+                )}
+
+                {/* Campo para adicionar email manualmente */}
+                <div className="form-group">
+                  <label htmlFor="destinatario">Adicionar E-mail:</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="email"
+                      id="destinatario"
+                      className="form-control"
+                      value={emailData.destinatario}
+                      onChange={(e) => setEmailData({ ...emailData, destinatario: e.target.value })}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          adicionarEmail(emailData.destinatario)
+                        }
+                      }}
+                      placeholder="nome@exemplo.com"
+                    />
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      onClick={() => adicionarEmail(emailData.destinatario)}
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      Adicionar
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de emails adicionados */}
+                {emailsDestinatarios.length > 0 && (
+                  <div className="emails-lista-container">
+                    <strong>Destinatários ({emailsDestinatarios.length}):</strong>
+                    <div className="emails-lista">
+                      {emailsDestinatarios.map((email, index) => (
+                        <div key={index} className="email-tag">
+                          <span>{email}</span>
+                          <button 
+                            className="email-tag-remove"
+                            onClick={() => removerEmail(email)}
+                            title="Remover"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Assunto */}
                 <div className="form-group">
                   <label htmlFor="assunto">Assunto:</label>
                   <input
@@ -532,20 +822,25 @@ function ReuniaoDetalhes() {
                     className="form-control"
                     value={emailData.assunto}
                     onChange={(e) => setEmailData({ ...emailData, assunto: e.target.value })}
-                    placeholder={`Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`}
+                    placeholder={`Ata Reunião...`}
                   />
                 </div>
+
+                {/* Botões de ação */}
                 <div className="form-actions">
                   <button 
                     className="btn btn-success btn-sm"
                     onClick={enviarEmail}
-                    disabled={!emailData.destinatario || saving}
+                    disabled={emailsDestinatarios.length === 0 || saving}
                   >
-                    {saving ? 'Enviando...' : 'Enviar'}
+                    {saving ? 'Enviando...' : `Enviar para ${emailsDestinatarios.length} pessoa(s)`}
                   </button>
                   <button 
                     className="btn btn-primary btn-sm"
-                    onClick={() => setEmailData({ ...emailData, showEmailForm: false })}
+                    onClick={() => {
+                      setEmailData({ ...emailData, showEmailForm: false })
+                      setEmailsDestinatarios([])
+                    }}
                   >
                     Cancelar
                   </button>

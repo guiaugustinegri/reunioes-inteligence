@@ -244,6 +244,8 @@ function EmpresasManager({ onMessage }) {
 function ProdutosManager({ onMessage }) {
   const [produtos, setProdutos] = useState([])
   const [empresas, setEmpresas] = useState([])
+  const [participantes, setParticipantes] = useState([])
+  const [participantesProduto, setParticipantesProduto] = useState([])
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ id: null, nome: '', descricao: '', empresa_id: '' })
   const [isEditing, setIsEditing] = useState(false)
@@ -255,16 +257,19 @@ function ProdutosManager({ onMessage }) {
 
   const carregarDados = async () => {
     try {
-      const [produtosRes, empresasRes] = await Promise.all([
+      const [produtosRes, empresasRes, participantesRes] = await Promise.all([
         supabase.from('produtos').select('*, empresas!produtos_empresa_id_fkey(nome)').order('nome'),
-        supabase.from('empresas').select('id, nome').order('nome')
+        supabase.from('empresas').select('id, nome').order('nome'),
+        supabase.from('participantes').select('id, nome, email').order('nome')
       ])
 
       if (produtosRes.error) throw produtosRes.error
       if (empresasRes.error) throw empresasRes.error
+      if (participantesRes.error) throw participantesRes.error
 
       setProdutos(produtosRes.data || [])
       setEmpresas(empresasRes.data || [])
+      setParticipantes(participantesRes.data || [])
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
       onMessage('Erro ao carregar dados: ' + error.message)
@@ -305,7 +310,56 @@ function ProdutosManager({ onMessage }) {
     }
   }
 
-  const editarProduto = (produto) => {
+  const carregarParticipantesProduto = async (produtoId) => {
+    try {
+      const { data, error } = await supabase
+        .from('produto_participantes')
+        .select(`
+          participantes!produto_participantes_participante_id_fkey(id, nome, email)
+        `)
+        .eq('produto_id', produtoId)
+
+      if (error) throw error
+      setParticipantesProduto(data?.map(p => p.participantes) || [])
+    } catch (error) {
+      console.error('Erro ao carregar participantes do produto:', error)
+      onMessage('Erro ao carregar participantes: ' + error.message)
+    }
+  }
+
+  const associarParticipante = async (produtoId, participanteId) => {
+    try {
+      const { error } = await supabase
+        .from('produto_participantes')
+        .insert({ produto_id: produtoId, participante_id: participanteId })
+
+      if (error) throw error
+      carregarParticipantesProduto(produtoId)
+      onMessage('Participante associado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao associar participante:', error)
+      onMessage('Erro ao associar participante: ' + error.message)
+    }
+  }
+
+  const desassociarParticipante = async (produtoId, participanteId) => {
+    try {
+      const { error } = await supabase
+        .from('produto_participantes')
+        .delete()
+        .eq('produto_id', produtoId)
+        .eq('participante_id', participanteId)
+
+      if (error) throw error
+      carregarParticipantesProduto(produtoId)
+      onMessage('Participante removido com sucesso!')
+    } catch (error) {
+      console.error('Erro ao remover participante:', error)
+      onMessage('Erro ao remover participante: ' + error.message)
+    }
+  }
+
+  const editarProduto = async (produto) => {
     setFormData({ 
       id: produto.id, 
       nome: produto.nome, 
@@ -314,6 +368,7 @@ function ProdutosManager({ onMessage }) {
     })
     setIsEditing(true)
     setIsFormExpanded(true)
+    await carregarParticipantesProduto(produto.id)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -398,6 +453,46 @@ function ProdutosManager({ onMessage }) {
               onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
             />
           </div>
+
+          {/* Seção de Participantes - Apenas ao editar */}
+          {isEditing && (
+            <div className="produto-participantes-section">
+              <h4>Participantes do Produto</h4>
+              <div className="participantes-checkboxes">
+                {participantes.map(participante => {
+                  const isAssociado = participantesProduto.some(p => p.id === participante.id)
+                  return (
+                    <div key={participante.id} className="participante-checkbox-item">
+                      <input
+                        type="checkbox"
+                        id={`participante-${participante.id}`}
+                        checked={isAssociado}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            associarParticipante(formData.id, participante.id)
+                          } else {
+                            desassociarParticipante(formData.id, participante.id)
+                          }
+                        }}
+                      />
+                      <label htmlFor={`participante-${participante.id}`}>
+                        <span className="participante-nome">{participante.nome}</span>
+                        {participante.email && (
+                          <span className="participante-email"> ({participante.email})</span>
+                        )}
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+              {participantes.length === 0 && (
+                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                  Nenhum participante cadastrado. Vá na aba "Participantes" para criar novos.
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="form-actions">
             <button type="submit" className="btn btn-success">
               {isEditing ? 'Atualizar' : 'Adicionar'}

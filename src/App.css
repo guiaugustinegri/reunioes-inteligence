@@ -1257,31 +1257,50 @@ textarea.form-control.large {
   margin-top: 1rem;
 }
 
+.custos-table .table-header,
+.custos-table .table-row {
+  grid-template-columns: 100px 350px 200px 200px 120px;
+  gap: 1rem;
+}
+
 .custos-table .col-date {
   width: 100px;
 }
 
 .custos-table .col-reuniao {
-  width: 250px;
+  width: 350px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0; /* Importante para permitir quebra em grid */
 }
 
 .custos-table .col-request {
   width: 200px;
+  min-width: 0;
 }
 
 .custos-table .col-custo {
   width: 120px;
   text-align: right;
+  min-width: 0;
 }
 
 .reuniao-titulo {
   font-weight: 600;
   margin-bottom: 0.25rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
 }
 
 .reuniao-meta {
   font-size: 0.875rem;
   color: #666;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .request-info {
@@ -1441,8 +1460,14 @@ textarea.form-control.large {
     margin: 1rem;
   }
   
+  .custos-table .table-header,
+  .custos-table .table-row {
+    grid-template-columns: 80px 280px 150px 150px 100px;
+    gap: 0.5rem;
+  }
+
   .custos-table .col-reuniao {
-    width: 200px;
+    width: 280px;
   }
   
   .custos-table .col-request {
@@ -1914,4 +1939,248 @@ textarea.form-control.large {
 
 .serie-link {
   cursor: pointer;
+}
+
+/* Email Form - Nova Interface */
+.email-quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  background-color: #f9fafb;
+  color: #000;
+  border-color: #000;
+}
+
+.btn-secondary:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+.btn-secondary:disabled {
+  background-color: #f9fafb;
+  color: #9ca3af;
+  border-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-secondary:disabled:hover {
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.emails-lista-container {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 2px solid #000;
+}
+
+.emails-lista-container strong {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  color: #000;
+}
+
+.emails-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.email-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.email-tag:hover {
+  border-color: #000;
+}
+
+.email-tag span {
+  color: #111827;
+}
+
+.email-tag-remove {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: all 0.2s;
+  font-weight: 700;
+}
+
+.email-tag-remove:hover {
+  color: #000;
+  transform: scale(1.2);
+}
+
+/* Badge de Email Enviado */
+.email-badge-enviado {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #000;
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+  line-height: 1;
+  border: 2px solid #fff;
+}
+
+/* Histórico de Envios */
+.email-historico-alert {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.email-historico-alert strong {
+  display: block;
+  color: #000;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.email-historico-resumo {
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.email-historico-lista {
+  margin-top: 0.75rem;
+  border-top: 2px solid #d1d5db;
+  padding-top: 0.75rem;
+}
+
+.email-historico-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  margin-bottom: 0.5rem;
+}
+
+.email-historico-item:last-child {
+  margin-bottom: 0;
+}
+
+.historico-numero {
+  font-weight: 700;
+  color: #6b7280;
+  font-size: 0.75rem;
+  min-width: 30px;
+}
+
+.historico-info {
+  flex: 1;
+}
+
+.historico-data {
+  font-weight: 600;
+  color: #000;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.historico-assunto {
+  color: #374151;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.historico-destinatarios {
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Gerenciar Participantes de Produtos */
+.produto-participantes-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 2px solid #d1d5db;
+  background: #f9fafb;
+}
+
+.produto-participantes-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.75rem;
+  color: #000;
+}
+
+.participantes-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.participante-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  transition: all 0.2s;
+}
+
+.participante-checkbox-item:hover {
+  border-color: #000;
+  background: #f9fafb;
+}
+
+.participante-checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #000;
+}
+
+.participante-checkbox-item label {
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.participante-nome {
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.participante-email {
+  color: #6b7280;
+  font-size: 0.8rem;
 }

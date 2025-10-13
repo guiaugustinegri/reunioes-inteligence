@@ -30,6 +30,8 @@ function ReuniaoForm() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [showNovoParticipante, setShowNovoParticipante] = useState(false)
+  const [novoParticipante, setNovoParticipante] = useState({ nome: '', email: '' })
 
   useEffect(() => {
     carregarDados()
@@ -145,6 +147,44 @@ function ReuniaoForm() {
         ? [...prev.participantes, participanteId]
         : prev.participantes.filter(id => id !== participanteId)
     }))
+  }
+
+  const criarNovoParticipante = async () => {
+    if (!novoParticipante.nome.trim()) {
+      setMessage('Nome do participante é obrigatório!')
+      return
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('participantes')
+        .insert({
+          nome: novoParticipante.nome.trim(),
+          email: novoParticipante.email.trim() || null
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Adicionar à lista de participantes
+      setParticipantes(prev => [...prev, data])
+      
+      // Auto-selecionar o novo participante
+      setFormData(prev => ({
+        ...prev,
+        participantes: [...prev.participantes, data.id]
+      }))
+
+      // Limpar formulário
+      setNovoParticipante({ nome: '', email: '' })
+      setShowNovoParticipante(false)
+      setMessage('Participante criado e adicionado à reunião!')
+      
+    } catch (error) {
+      console.error('Erro ao criar participante:', error)
+      setMessage('Erro ao criar participante: ' + error.message)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -351,6 +391,68 @@ function ReuniaoForm() {
 
         <div className="form-group">
           <label>Participantes:</label>
+          
+          {/* Botão para adicionar novo participante */}
+          <div style={{ marginBottom: '1rem' }}>
+            <button 
+              type="button" 
+              className="btn btn-primary btn-sm"
+              onClick={() => setShowNovoParticipante(!showNovoParticipante)}
+            >
+              {showNovoParticipante ? '−' : '+'} Adicionar Novo Participante
+            </button>
+          </div>
+
+          {/* Formulário para novo participante */}
+          {showNovoParticipante && (
+            <div className="novo-participante-form" style={{ 
+              padding: '1rem', 
+              background: '#f9fafb', 
+              border: '2px solid #d1d5db',
+              marginBottom: '1rem'
+            }}>
+              <h4 style={{ fontSize: '0.875rem', marginBottom: '0.75rem' }}>Novo Participante</h4>
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <input
+                  type="text"
+                  placeholder="Nome do participante"
+                  value={novoParticipante.nome}
+                  onChange={(e) => setNovoParticipante({ ...novoParticipante, nome: e.target.value })}
+                  className="form-control"
+                  style={{ flex: 1 }}
+                />
+                <input
+                  type="email"
+                  placeholder="Email (opcional)"
+                  value={novoParticipante.email}
+                  onChange={(e) => setNovoParticipante({ ...novoParticipante, email: e.target.value })}
+                  className="form-control"
+                  style={{ flex: 1 }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-success btn-sm"
+                  onClick={criarNovoParticipante}
+                >
+                  Criar e Adicionar
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    setShowNovoParticipante(false)
+                    setNovoParticipante({ nome: '', email: '' })
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Lista de participantes existentes */}
           <div className="checkbox-group">
             {participantes.map(participante => (
               <div key={participante.id} className="checkbox-item">
