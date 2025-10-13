@@ -43,9 +43,29 @@ function SeriesReunioes() {
 
   const inicializarSeriesAutomaticas = async () => {
     try {
-      // Primeiro, garantir que séries automáticas existam
-      await criarSeriesAutomaticasSilenciosamente()
-      // Depois carregar dados
+      // Verificar se já inicializou séries nesta sessão
+      const seriesInicializadas = sessionStorage.getItem('series_auto_inicializadas')
+      const ultimaInicializacao = sessionStorage.getItem('series_auto_timestamp')
+      const agora = Date.now()
+      const INTERVALO_MINIMO = 5 * 60 * 1000 // 5 minutos
+
+      // Só criar séries automáticas se:
+      // 1. Nunca foi inicializado nesta sessão, OU
+      // 2. Passou mais de 5 minutos desde a última inicialização
+      const deveInicializar = !seriesInicializadas || 
+                              !ultimaInicializacao || 
+                              (agora - parseInt(ultimaInicializacao)) > INTERVALO_MINIMO
+
+      if (deveInicializar) {
+        console.log('Inicializando séries automáticas...')
+        await criarSeriesAutomaticasSilenciosamente()
+        sessionStorage.setItem('series_auto_inicializadas', 'true')
+        sessionStorage.setItem('series_auto_timestamp', agora.toString())
+      } else {
+        console.log('Séries já inicializadas recentemente, pulando...')
+      }
+      
+      // Sempre carregar dados
       await carregarDados()
     } catch (error) {
       console.error('Erro ao inicializar:', error)
@@ -54,9 +74,82 @@ function SeriesReunioes() {
     }
   }
 
+  const limparSeriesDuplicadas = async () => {
+    try {
+      // Buscar todas as séries automáticas
+      const { data: seriesAuto, error: seriesError } = await supabase
+        .from('series_reunioes')
+        .select('*')
+        .eq('tipo_agrupamento', 'auto_produto')
+        .order('created_at', { ascending: true })
+
+      if (seriesError) throw seriesError
+
+      // Agrupar por empresa + produto
+      const grupos = {}
+      const duplicatasParaExcluir = []
+
+      seriesAuto.forEach(serie => {
+        const key = `${serie.empresa_id}-${serie.produto_id}`
+        
+        if (!grupos[key]) {
+          // Primeira série deste grupo - manter
+          grupos[key] = serie
+        } else {
+          // Duplicata - marcar para exclusão
+          duplicatasParaExcluir.push(serie.id)
+        }
+      })
+
+      // Excluir duplicatas
+      if (duplicatasParaExcluir.length > 0) {
+        console.log(`Removendo ${duplicatasParaExcluir.length} séries duplicadas...`)
+        
+        for (const serieId of duplicatasParaExcluir) {
+          // Desassociar reuniões antes de excluir
+          await supabase
+            .from('reunioes')
+            .update({ serie_id: null })
+            .eq('serie_id', serieId)
+
+          // Excluir série duplicada
+          await supabase
+            .from('series_reunioes')
+            .delete()
+            .eq('id', serieId)
+        }
+        
+        console.log(`${duplicatasParaExcluir.length} séries duplicadas removidas!`)
+      }
+
+      return grupos // Retornar grupos únicos
+    } catch (error) {
+      console.error('Erro ao limpar duplicatas:', error)
+      return {}
+    }
+  }
+
   const criarSeriesAutomaticasSilenciosamente = async () => {
     try {
-      // Buscar combinações únicas de empresa + produto que têm reuniões
+      // 1. Primeiro limpar duplicatas existentes
+      await limparSeriesDuplicadas()
+
+      // 2. Buscar todas as séries automáticas existentes em uma única query
+      const { data: seriesExistentes, error: seriesError } = await supabase
+        .from('series_reunioes')
+        .select('id, empresa_id, produto_id')
+        .eq('tipo_agrupamento', 'auto_produto')
+
+      if (seriesError) throw seriesError
+
+      // Criar mapa de séries existentes para verificação rápida
+      const seriesMap = {}
+      seriesExistentes.forEach(serie => {
+        const key = `${serie.empresa_id}-${serie.produto_id}`
+        seriesMap[key] = serie.id
+      })
+
+      // 3. Buscar combinações únicas de empresa + produto que têm reuniões
       const { data: combinacoes, error: combinacoesError } = await supabase
         .from('reunioes')
         .select(`
@@ -70,7 +163,7 @@ function SeriesReunioes() {
 
       if (combinacoesError) throw combinacoesError
 
-      // Agrupar por empresa + produto
+      // 4. Agrupar por empresa + produto
       const grupos = {}
       combinacoes.forEach(reuniao => {
         const key = `${reuniao.empresa_id}-${reuniao.produto_id}`
@@ -84,19 +177,12 @@ function SeriesReunioes() {
         }
       })
 
-      // Criar/atualizar série para cada grupo
-      for (const grupo of Object.values(grupos)) {
-        const { data: serieExistente } = await supabase
-          .from('series_reunioes')
-          .select('id')
-          .eq('empresa_id', grupo.empresa_id)
-          .eq('produto_id', grupo.produto_id)
-          .eq('tipo_agrupamento', 'auto_produto')
-          .single()
-
-        let serieId
+      // 5. Criar apenas as séries que não existem
+      for (const [key, grupo] of Object.entries(grupos)) {
+        let serieId = seriesMap[key]
         
-        if (!serieExistente) {
+        if (!serieId) {
+          // Série não existe, criar
           const nomeSerie = `${grupo.produto_nome} - ${grupo.empresa_nome}`
           
           const { data: novaSerie, error: erroCriacao } = await supabase
@@ -112,13 +198,16 @@ function SeriesReunioes() {
             .select()
             .single()
 
-          if (erroCriacao) continue
+          if (erroCriacao) {
+            console.error('Erro ao criar série:', erroCriacao)
+            continue
+          }
+          
           serieId = novaSerie.id
-        } else {
-          serieId = serieExistente.id
+          console.log(`Série criada: ${nomeSerie}`)
         }
 
-        // Associar reuniões à série
+        // 6. Associar reuniões sem série à série correta
         await supabase
           .from('reunioes')
           .update({ serie_id: serieId })
@@ -333,8 +422,27 @@ function SeriesReunioes() {
   const handleCriarSeriesAutomaticas = async () => {
     try {
       setLoading(true)
+      setMessage('Processando séries automáticas...')
       
-      // Buscar combinações únicas de empresa + produto que têm reuniões
+      // 1. Primeiro limpar duplicatas
+      await limparSeriesDuplicadas()
+
+      // 2. Buscar todas as séries automáticas existentes
+      const { data: seriesExistentes, error: seriesError } = await supabase
+        .from('series_reunioes')
+        .select('id, empresa_id, produto_id')
+        .eq('tipo_agrupamento', 'auto_produto')
+
+      if (seriesError) throw seriesError
+
+      // Criar mapa de séries existentes
+      const seriesMap = {}
+      seriesExistentes.forEach(serie => {
+        const key = `${serie.empresa_id}-${serie.produto_id}`
+        seriesMap[key] = serie.id
+      })
+      
+      // 3. Buscar combinações únicas de empresa + produto que têm reuniões
       const { data: combinacoes, error: combinacoesError } = await supabase
         .from('reunioes')
         .select(`
@@ -348,7 +456,7 @@ function SeriesReunioes() {
 
       if (combinacoesError) throw combinacoesError
 
-      // Agrupar por empresa + produto
+      // 4. Agrupar por empresa + produto
       const grupos = {}
       combinacoes.forEach(reuniao => {
         const key = `${reuniao.empresa_id}-${reuniao.produto_id}`
@@ -363,23 +471,14 @@ function SeriesReunioes() {
       })
 
       const seriesCriadas = []
+      const seriesAtualizadas = []
 
-      // Criar série para cada grupo que não tenha série automática
-      for (const grupo of Object.values(grupos)) {
-        // Verificar se já existe série automática para esta combinação
-        const { data: serieExistente } = await supabase
-          .from('series_reunioes')
-          .select('id')
-          .eq('empresa_id', grupo.empresa_id)
-          .eq('produto_id', grupo.produto_id)
-          .eq('tipo_agrupamento', 'auto_produto')
-          .single()
-
-        // Sempre criar/atualizar série automática para cada combinação
-        let serieId
+      // 5. Criar apenas séries que não existem
+      for (const [key, grupo] of Object.entries(grupos)) {
+        let serieId = seriesMap[key]
         
-        if (!serieExistente) {
-          // Criar nova série automática
+        if (!serieId) {
+          // Série não existe, criar
           const nomeSerie = `${grupo.produto_nome} - ${grupo.empresa_nome}`
           
           const { data: novaSerie, error: erroCriacao } = await supabase
@@ -403,27 +502,32 @@ function SeriesReunioes() {
           serieId = novaSerie.id
           seriesCriadas.push(novaSerie)
         } else {
-          serieId = serieExistente.id
+          seriesAtualizadas.push(serieId)
         }
 
-        // Associar TODAS as reuniões desta empresa+produto à série
+        // 6. Associar reuniões sem série
         await supabase
           .from('reunioes')
           .update({ serie_id: serieId })
           .eq('empresa_id', grupo.empresa_id)
           .eq('produto_id', grupo.produto_id)
-          .is('serie_id', null) // Apenas reuniões que ainda não têm série
+          .is('serie_id', null)
       }
 
       const totalGrupos = Object.keys(grupos).length
-      setMessage(seriesCriadas.length > 0 
-        ? `${seriesCriadas.length} séries automáticas criadas! Total de ${totalGrupos} séries ativas.`
-        : `${totalGrupos} séries automáticas já existiam. Reuniões foram associadas.`
-      )
+      
+      if (seriesCriadas.length > 0) {
+        setMessage(`✅ ${seriesCriadas.length} nova(s) série(s) criada(s)! Total: ${totalGrupos} série(s) ativa(s).`)
+      } else if (totalGrupos > 0) {
+        setMessage(`✅ ${totalGrupos} série(s) automática(s) já existem. Reuniões associadas.`)
+      } else {
+        setMessage('ℹ️ Nenhuma combinação empresa+produto encontrada com reuniões.')
+      }
+      
       carregarDados()
     } catch (error) {
       console.error('Erro ao criar séries automáticas:', error)
-      setMessage('Erro ao criar séries automáticas: ' + error.message)
+      setMessage('❌ Erro ao criar séries automáticas: ' + error.message)
     } finally {
       setLoading(false)
     }
@@ -586,6 +690,21 @@ function SeriesReunioes() {
                 onClick={handleNovaSerie}
               >
                 NOVA SÉRIE
+              </button>
+              <button 
+                className="btn btn-secondary btn-sm"
+                onClick={async () => {
+                  setLoading(true)
+                  setMessage('Limpando duplicatas...')
+                  const grupos = await limparSeriesDuplicadas()
+                  const total = Object.keys(grupos).length
+                  setMessage(`✅ Limpeza concluída! ${total} série(s) única(s) mantida(s).`)
+                  carregarDados()
+                  setLoading(false)
+                }}
+                title="Remover séries duplicadas"
+              >
+                🧹 LIMPAR
               </button>
             </div>
           </div>
