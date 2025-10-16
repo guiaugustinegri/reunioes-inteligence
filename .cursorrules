@@ -110,6 +110,14 @@ Antes de criar qualquer componente, verifique:
 - `backups/` - Backups organizados por data
 - `database/` - Scripts SQL
 
+## 📋 Regras de Atualização de Arquivos
+
+### BACKLOG.md - NÃO ATUALIZAR AUTOMATICAMENTE
+- **IMPORTANTE**: O arquivo `docs/BACKLOG.md` NÃO deve ser atualizado automaticamente
+- **SEMPRE** perguntar antes de modificar este arquivo
+- **APENAS** atualize quando o usuário solicitar explicitamente
+- Este arquivo é gerenciado manualmente pelo usuário
+
 ## 🔧 Tecnologias
 
 - **Frontend**: React + Vite

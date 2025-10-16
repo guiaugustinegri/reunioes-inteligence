@@ -1,0 +1,745 @@
+/* ========================================
+   GERENCIAR - DESIGN SYSTEM MODERNO
+   ======================================== */
+
+/* Layout Principal */
+.gerenciar-page {
+  min-height: 100vh;
+  background: #e5e7eb;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+.page-header-gerenciar {
+  background: #000;
+  color: #fff;
+  border-bottom: 4px solid #000;
+  padding: 2rem;
+  margin: 0;
+}
+
+.header-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0 0 0.5rem 0;
+}
+
+.header-subtitle {
+  font-size: 0.875rem;
+  color: #d1d5db;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* ========================================
+   MENSAGENS
+   ======================================== */
+.message-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  margin: 2rem;
+  border: 2px solid #000;
+  background: #fff;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-banner.success {
+  border-left: 6px solid #000;
+}
+
+.message-banner.error {
+  border-left: 6px solid #000;
+  background: #f9fafb;
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.message-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #000;
+  background: #000;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.message-close {
+  background: none;
+  border: 2px solid #000;
+  color: #000;
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.message-close:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* ========================================
+   TABS
+   ======================================== */
+.tabs-container {
+  padding: 0;
+  margin: 2rem 2rem;
+}
+
+.tabs-gerenciar {
+  display: flex;
+  gap: 0;
+  border: 2px solid #000;
+  background: #fff;
+  overflow: hidden;
+}
+
+.tab-gerenciar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-right: 2px solid #000;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.tab-gerenciar:last-child {
+  border-right: none;
+}
+
+.tab-gerenciar:hover {
+  background: #f9fafb;
+}
+
+.tab-gerenciar.active {
+  background: #000;
+  color: #fff;
+}
+
+.tab-icon {
+  font-size: 0.625rem;
+}
+
+/* ========================================
+   CONTEÚDO DAS TABS
+   ======================================== */
+.tab-content-gerenciar {
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+}
+
+.manager-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   LOADING STATE
+   ======================================== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1.5rem;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #d1d5db;
+  border-top: 4px solid #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* ========================================
+   FORM CARD
+   ======================================== */
+.form-card {
+  background: #fff;
+  border: 2px solid #000;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.form-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border-bottom: 2px solid #000;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.form-card-header:hover {
+  background: #f9fafb;
+}
+
+.form-card-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-icon {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.form-card-title h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+  color: #000;
+}
+
+.btn-toggle-form {
+  background: #000;
+  color: #fff;
+  border: 2px solid #000;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 48px;
+}
+
+.btn-toggle-form:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* ========================================
+   FORM MODERN
+   ======================================== */
+.form-modern {
+  padding: 2rem 1.5rem;
+  background: #fff;
+}
+
+.form-row {
+  margin-bottom: 1.5rem;
+}
+
+.form-row-double {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #111827;
+}
+
+.input-modern,
+.select-modern,
+.textarea-modern {
+  font-size: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  color: #000;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-modern:focus,
+.select-modern:focus,
+.textarea-modern:focus {
+  border-color: #000;
+  background: #fff;
+}
+
+.input-modern::placeholder,
+.textarea-modern::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.textarea-modern {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.select-modern {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23000' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 3rem;
+}
+
+/* ========================================
+   PARTICIPANTES SECTION
+   ======================================== */
+.participantes-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #d1d5db;
+}
+
+.participantes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.participantes-header h4 {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #111827;
+  margin: 0;
+}
+
+.participantes-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #d1d5db;
+}
+
+.participantes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.checkbox-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.checkbox-card:hover {
+  border-color: #000;
+  background: #f9fafb;
+}
+
+.checkbox-card input[type="checkbox"] {
+  margin-top: 0.25rem;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkbox-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.checkbox-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.checkbox-email {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.empty-hint-box {
+  padding: 1rem;
+  background: #f9fafb;
+  border: 2px solid #d1d5db;
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  font-style: italic;
+}
+
+/* ========================================
+   FORM ACTIONS
+   ======================================== */
+.form-actions-modern {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #d1d5db;
+}
+
+/* ========================================
+   DATA SECTION
+   ======================================== */
+.data-section {
+  background: #fff;
+  border: 2px solid #000;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: #000;
+  color: #fff;
+  border-bottom: 2px solid #000;
+}
+
+.section-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.count-badge {
+  background: #fff;
+  color: #000;
+  padding: 0.375rem 0.875rem;
+  border: 2px solid #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #d1d5db;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+}
+
+.empty-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ========================================
+   DATA TABLE MODERN
+   ======================================== */
+.data-table-modern {
+  background: #fff;
+}
+
+.table-header-modern {
+  display: grid;
+  padding: 1rem 1.5rem;
+  background: #f9fafb;
+  border-bottom: 2px solid #000;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #111827;
+}
+
+.table-body-modern {
+  background: #fff;
+}
+
+.table-row-modern {
+  display: grid;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #d1d5db;
+  transition: background 0.15s ease;
+  align-items: center;
+}
+
+.table-row-modern:last-child {
+  border-bottom: none;
+}
+
+.table-row-modern:hover {
+  background: #f9fafb;
+}
+
+/* Grid Templates para Empresas */
+.table-header-modern:has(.col-empresa-nome),
+.table-row-modern:has(.col-empresa-nome) {
+  grid-template-columns: 1.2fr 3fr 160px;
+  gap: 1.5rem;
+}
+
+/* Grid Templates para Produtos */
+.table-header-modern:has(.col-produto-nome),
+.table-row-modern:has(.col-produto-nome) {
+  grid-template-columns: 1.5fr 1.2fr 2fr 160px;
+  gap: 1.5rem;
+}
+
+/* Grid Templates para Participantes */
+.table-header-modern:has(.col-participante-nome),
+.table-row-modern:has(.col-participante-nome) {
+  grid-template-columns: 1.8fr 2.2fr 160px;
+  gap: 1.5rem;
+}
+
+/* Estilos de coluna compartilhados */
+.col-empresa-nome,
+.col-produto-nome,
+.col-participante-nome {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.empresa-marker,
+.produto-marker,
+.participante-marker {
+  font-size: 0.5rem;
+  color: #000;
+}
+
+.empresa-name,
+.produto-name,
+.participante-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.col-empresa-desc,
+.col-produto-desc,
+.col-produto-empresa,
+.col-participante-email {
+  font-size: 0.875rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-muted {
+  color: #d1d5db;
+  font-style: italic;
+}
+
+/* ========================================
+   ACTION BUTTONS
+   ======================================== */
+.col-empresa-actions,
+.col-produto-actions,
+.col-participante-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.btn-action {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.5rem 1rem;
+  border: 2px solid #000;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+  background: #000;
+  color: #fff;
+}
+
+.btn-edit {
+  /* Usa o estilo base */
+}
+
+.btn-delete {
+  /* Usa o estilo base */
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1024px) {
+  .form-row-double {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .participantes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header-modern:has(.col-empresa-nome),
+  .table-row-modern:has(.col-empresa-nome) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .table-header-modern:has(.col-produto-nome),
+  .table-row-modern:has(.col-produto-nome) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .table-header-modern:has(.col-participante-nome),
+  .table-row-modern:has(.col-participante-nome) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .col-empresa-actions,
+  .col-produto-actions,
+  .col-participante-actions {
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header-gerenciar {
+    padding: 1.5rem 1rem;
+  }
+
+  .header-content h2 {
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .tabs-container {
+    padding: 0 1rem;
+  }
+
+  .tabs-gerenciar {
+    flex-direction: column;
+  }
+
+  .tab-gerenciar {
+    border-right: none;
+    border-bottom: 2px solid #000;
+  }
+
+  .tab-gerenciar:last-child {
+    border-bottom: none;
+  }
+
+  .tab-content-gerenciar {
+    padding: 0 1rem 2rem 1rem;
+  }
+
+  .message-banner {
+    margin: 0 1rem 1.5rem 1rem;
+  }
+
+  .form-modern {
+    padding: 1.5rem 1rem;
+  }
+
+  .btn-action {
+    flex: 1;
+  }
+}
+

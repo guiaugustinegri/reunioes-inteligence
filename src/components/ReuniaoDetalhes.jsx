@@ -187,7 +187,7 @@ function ReuniaoDetalhes() {
               line-height: 1.6;
               max-width: 800px;
               margin: 0 auto;
-              padding: 2rem;
+              padding: 3rem;
               color: #333;
             }
             h1, h2, h3, h4, h5, h6 {
@@ -213,7 +213,7 @@ function ReuniaoDetalhes() {
             }
             @media print {
               body {
-                padding: 1rem;
+                padding: 2rem;
               }
             }
           </style>
@@ -223,7 +223,7 @@ function ReuniaoDetalhes() {
             <h1>${reuniao.titulo_original || 'Reunião'}</h1>
             ${reuniao.empresas?.nome ? `<div class="meta"><strong>Empresa:</strong> ${reuniao.empresas.nome}</div>` : ''}
             ${reuniao.produtos?.nome ? `<div class="meta"><strong>Produto:</strong> ${reuniao.produtos.nome}</div>` : ''}
-            ${reuniao.data_reuniao ? `<div class="meta"><strong>Data:</strong> ${new Date(reuniao.data_reuniao).toLocaleDateString('pt-BR')}</div>` : ''}
+            ${reuniao.data_reuniao ? `<div class="meta"><strong>Data:</strong> ${formatarData(reuniao.data_reuniao)}</div>` : ''}
           </div>
           ${conteudo}
         </body>
@@ -911,6 +911,14 @@ function ReuniaoDetalhes() {
           <div className="detalhes-card">
             <h3>To-do Guilherme</h3>
             <div className="detalhe-texto">{reuniao.tarefas_guilherme}</div>
+          </div>
+        )}
+
+        {/* Card de To-do Cliente */}
+        {reuniao.todo_cliente && (
+          <div className="detalhes-card">
+            <h3>To-do Cliente</h3>
+            <div className="detalhe-texto">{reuniao.todo_cliente}</div>
           </div>
         )}
 

@@ -27,7 +27,8 @@ function SeriesReunioes() {
     mostrarResumoConciso: false,
     mostrarResumoIA: false,
     mostrarTarefas: true,
-    ordenacao: 'data_asc' // data_asc, data_desc, titulo
+    mostrarTodoCliente: false,
+    ordenacao: 'data_desc' // data_desc, data_asc
   })
   
   // Filtros
@@ -37,9 +38,45 @@ function SeriesReunioes() {
     busca: ''
   })
 
+  // Estado para controlar se as preferências foram salvas
+  const [preferenciasSalvas, setPreferenciasSalvas] = useState(false)
+
   useEffect(() => {
+    carregarPreferenciasUsuario()
     inicializarSeriesAutomaticas()
   }, [])
+
+  const carregarPreferenciasUsuario = () => {
+    try {
+      const preferenciasSalvas = localStorage.getItem('series_preferencias_visualizacao')
+      if (preferenciasSalvas) {
+        const preferencias = JSON.parse(preferenciasSalvas)
+        setVisualizacao(prev => ({
+          ...prev,
+          ...preferencias
+        }))
+        setPreferenciasSalvas(true)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar preferências:', error)
+    }
+  }
+
+  const salvarPreferenciasUsuario = () => {
+    try {
+      localStorage.setItem('series_preferencias_visualizacao', JSON.stringify(visualizacao))
+      setPreferenciasSalvas(true)
+      setMessage('✅ Preferências salvas! Suas configurações serão lembradas.')
+      
+      // Remover mensagem após 3 segundos
+      setTimeout(() => {
+        setMessage('')
+      }, 3000)
+    } catch (error) {
+      console.error('Erro ao salvar preferências:', error)
+      setMessage('❌ Erro ao salvar preferências: ' + error.message)
+    }
+  }
 
   const inicializarSeriesAutomaticas = async () => {
     try {
@@ -331,6 +368,7 @@ function SeriesReunioes() {
           resumo_conciso,
           resumo_ia,
           tarefas_guilherme,
+          todo_cliente,
           status,
           ignorada,
           created_at
@@ -584,6 +622,7 @@ function SeriesReunioes() {
       ...prev,
       [campo]: !prev[campo]
     }))
+    setPreferenciasSalvas(false) // Marcar que as preferências foram alteradas
   }
 
   const handleOrdenacaoChange = (novaOrdenacao) => {
@@ -591,6 +630,7 @@ function SeriesReunioes() {
       ...prev,
       ordenacao: novaOrdenacao
     }))
+    setPreferenciasSalvas(false) // Marcar que as preferências foram alteradas
   }
 
   const ordenarReunioes = (reunioes) => {
@@ -609,11 +649,6 @@ function SeriesReunioes() {
       case 'data_desc':
         reunioesComOrdenacao = reunioesOrdenadas.sort((a, b) => 
           new Date(b.data_reuniao) - new Date(a.data_reuniao)
-        )
-        break
-      case 'titulo':
-        reunioesComOrdenacao = reunioesOrdenadas.sort((a, b) => 
-          (a.titulo_original || '').localeCompare(b.titulo_original || '')
         )
         break
       default:
@@ -890,7 +925,15 @@ function SeriesReunioes() {
                         checked={visualizacao.mostrarTarefas}
                         onChange={() => toggleVisualizacao('mostrarTarefas')}
                       />
-                      <span>Tarefas/Pendências</span>
+                      <span>Minhas Tarefas</span>
+                    </label>
+                    <label className="checkbox-inline">
+                      <input
+                        type="checkbox"
+                        checked={visualizacao.mostrarTodoCliente}
+                        onChange={() => toggleVisualizacao('mostrarTodoCliente')}
+                      />
+                      <span>To-do Cliente</span>
                     </label>
                   </div>
                 </div>
@@ -898,16 +941,6 @@ function SeriesReunioes() {
                 <div className="controles-section">
                   <h4>ORDENAR POR:</h4>
                   <div className="controles-radios">
-                    <label className="radio-inline">
-                      <input
-                        type="radio"
-                        name="ordenacao"
-                        value="data_asc"
-                        checked={visualizacao.ordenacao === 'data_asc'}
-                        onChange={() => handleOrdenacaoChange('data_asc')}
-                      />
-                      <span>Data (Mais Antiga → Mais Recente)</span>
-                    </label>
                     <label className="radio-inline">
                       <input
                         type="radio"
@@ -922,13 +955,25 @@ function SeriesReunioes() {
                       <input
                         type="radio"
                         name="ordenacao"
-                        value="titulo"
-                        checked={visualizacao.ordenacao === 'titulo'}
-                        onChange={() => handleOrdenacaoChange('titulo')}
+                        value="data_asc"
+                        checked={visualizacao.ordenacao === 'data_asc'}
+                        onChange={() => handleOrdenacaoChange('data_asc')}
                       />
-                      <span>Título (A-Z)</span>
+                      <span>Data (Mais Antiga → Mais Recente)</span>
                     </label>
                   </div>
+                </div>
+
+                {/* Botão de Salvar Preferências */}
+                <div className="controles-section">
+                  <button 
+                    className={`btn btn-sm ${preferenciasSalvas ? 'btn-success' : 'btn-warning'}`}
+                    onClick={salvarPreferenciasUsuario}
+                    title={preferenciasSalvas ? 'Preferências salvas - Clique para salvar novamente' : 'Salvar preferências de visualização (ordenação e campos exibidos)'}
+                    style={{ padding: '0.5rem', minWidth: 'auto' }}
+                  >
+                    💾
+                  </button>
                 </div>
               </div>
 
@@ -992,8 +1037,15 @@ function SeriesReunioes() {
 
                         {visualizacao.mostrarTarefas && reuniao.tarefas_guilherme && (
                           <div className="resumo-section tarefas-section">
-                            <strong>TAREFAS/PENDÊNCIAS:</strong>
+                            <strong>MINHAS TAREFAS:</strong>
                             <p>{reuniao.tarefas_guilherme}</p>
+                          </div>
+                        )}
+
+                        {visualizacao.mostrarTodoCliente && reuniao.todo_cliente && (
+                          <div className="resumo-section todo-cliente-section">
+                            <strong>TO-DO CLIENTE:</strong>
+                            <p>{reuniao.todo_cliente}</p>
                           </div>
                         )}
                       </div>

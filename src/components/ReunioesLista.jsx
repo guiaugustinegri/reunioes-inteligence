@@ -176,7 +176,8 @@ function ReunioesLista() {
       (reuniao.empresas?.nome?.toLowerCase().includes(buscaLivre.toLowerCase())) ||
       (reuniao.produtos?.nome?.toLowerCase().includes(buscaLivre.toLowerCase())) ||
       (reuniao.resumo_ultra_conciso?.toLowerCase().includes(buscaLivre.toLowerCase())) ||
-      (reuniao.tarefas_guilherme?.toLowerCase().includes(buscaLivre.toLowerCase()))
+      (reuniao.tarefas_guilherme?.toLowerCase().includes(buscaLivre.toLowerCase())) ||
+      (reuniao.todo_cliente?.toLowerCase().includes(buscaLivre.toLowerCase()))
     
     // Filtro por data de início
     const matchDataInicio = !dataInicio || 
@@ -256,7 +257,7 @@ function ReunioesLista() {
         <input
           type="text"
           className="search-input"
-          placeholder="Buscar em reuniões (título, empresa, produto, resumo, tarefas...)"
+          placeholder="Buscar em reuniões (título, empresa, produto, resumo, tarefas, todo cliente...)"
           value={buscaLivre}
           onChange={(e) => setBuscaLivre(e.target.value)}
         />
@@ -351,7 +352,7 @@ function ReunioesLista() {
           <div className="col-produto">Produto</div>
           <div className="col-status">Status</div>
           <div className="col-resumo">Resumo Ultra Conciso</div>
-          <div className="col-todo">To-do Guilherme</div>
+          <div className="col-todo">Meus Todos</div>
         </div>
 
         {reunioesFiltradas.length === 0 ? (

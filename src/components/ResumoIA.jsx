@@ -70,6 +70,17 @@ function ResumoIA() {
     }
   }
 
+  const formatarData = (data) => {
+    if (!data) return '-'
+    // Criar a data considerando apenas a parte da data, ignorando timezone
+    const dataObj = new Date(data)
+    // Usar UTC para evitar problemas de timezone
+    const dia = dataObj.getUTCDate().toString().padStart(2, '0')
+    const mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, '0')
+    const ano = dataObj.getUTCFullYear()
+    return `${dia}-${mes}-${ano}`
+  }
+
   const exportarPDF = () => {
     // Cria uma janela de impressão que permite salvar como PDF
     const conteudo = document.getElementById('resumo-content').innerHTML
@@ -86,7 +97,7 @@ function ResumoIA() {
               line-height: 1.6;
               max-width: 800px;
               margin: 0 auto;
-              padding: 2rem;
+              padding: 3rem;
               color: #333;
             }
             h1, h2, h3, h4, h5, h6 {
@@ -112,7 +123,7 @@ function ResumoIA() {
             }
             @media print {
               body {
-                padding: 1rem;
+                padding: 2rem;
               }
             }
           </style>
@@ -122,7 +133,7 @@ function ResumoIA() {
             <h1>${reuniao.titulo_original || 'Reunião'}</h1>
             ${reuniao.empresas?.nome ? `<div class="meta"><strong>Empresa:</strong> ${reuniao.empresas.nome}</div>` : ''}
             ${reuniao.produtos?.nome ? `<div class="meta"><strong>Produto:</strong> ${reuniao.produtos.nome}</div>` : ''}
-            ${reuniao.data_reuniao ? `<div class="meta"><strong>Data:</strong> ${new Date(reuniao.data_reuniao).toLocaleDateString('pt-BR')}</div>` : ''}
+            ${reuniao.data_reuniao ? `<div class="meta"><strong>Data:</strong> ${formatarData(reuniao.data_reuniao)}</div>` : ''}
           </div>
           ${conteudo}
         </body>
@@ -185,14 +196,6 @@ function ResumoIA() {
     }
   }
 
-  const formatarData = (data) => {
-    if (!data) return '-'
-    return new Date(data).toLocaleDateString('pt-BR', { 
-      day: '2-digit', 
-      month: 'long', 
-      year: 'numeric' 
-    })
-  }
 
   if (loading) {
     return <div className="main-content">Carregando...</div>

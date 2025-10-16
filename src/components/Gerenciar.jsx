@@ -1,47 +1,69 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
+import './Gerenciar.css'
 
 function Gerenciar() {
   const [activeTab, setActiveTab] = useState('empresas')
   const [message, setMessage] = useState('')
 
+  const clearMessage = () => {
+    setTimeout(() => setMessage(''), 5000)
+  }
+
+  const handleMessage = (msg) => {
+    setMessage(msg)
+    clearMessage()
+  }
+
   return (
-    <div>
-      <div className="page-header">
-        <h2>Gerenciar Dados</h2>
+    <div className="gerenciar-page">
+      <div className="page-header-gerenciar">
+        <div className="header-content">
+          <h2>GERENCIAMENTO DE DADOS</h2>
+          <p className="header-subtitle">Configure empresas, produtos e participantes do sistema</p>
+        </div>
       </div>
 
       {message && (
-        <div className={`message ${message.includes('Erro') ? 'error' : 'success'}`}>
-          {message}
+        <div className={`message-banner ${message.includes('Erro') ? 'error' : 'success'}`}>
+          <div className="message-content">
+            <span className="message-icon">{message.includes('Erro') ? '✕' : '✓'}</span>
+            <span>{message}</span>
+          </div>
+          <button className="message-close" onClick={() => setMessage('')}>×</button>
         </div>
       )}
 
-      <div className="tabs">
-        <button 
-          className={`tab ${activeTab === 'empresas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('empresas')}
-        >
-          Empresas
-        </button>
-        <button 
-          className={`tab ${activeTab === 'produtos' ? 'active' : ''}`}
-          onClick={() => setActiveTab('produtos')}
-        >
-          Produtos
-        </button>
-        <button 
-          className={`tab ${activeTab === 'participantes' ? 'active' : ''}`}
-          onClick={() => setActiveTab('participantes')}
-        >
-          Participantes
-        </button>
+      <div className="tabs-container">
+        <div className="tabs-gerenciar">
+          <button 
+            className={`tab-gerenciar ${activeTab === 'empresas' ? 'active' : ''}`}
+            onClick={() => setActiveTab('empresas')}
+          >
+            <span className="tab-icon">■</span>
+            <span>EMPRESAS</span>
+          </button>
+          <button 
+            className={`tab-gerenciar ${activeTab === 'produtos' ? 'active' : ''}`}
+            onClick={() => setActiveTab('produtos')}
+          >
+            <span className="tab-icon">■</span>
+            <span>PRODUTOS</span>
+          </button>
+          <button 
+            className={`tab-gerenciar ${activeTab === 'participantes' ? 'active' : ''}`}
+            onClick={() => setActiveTab('participantes')}
+          >
+            <span className="tab-icon">■</span>
+            <span>PARTICIPANTES</span>
+          </button>
+        </div>
       </div>
 
-      <div className="tab-content">
-        {activeTab === 'empresas' && <EmpresasManager onMessage={setMessage} />}
-        {activeTab === 'produtos' && <ProdutosManager onMessage={setMessage} />}
-        {activeTab === 'participantes' && <ParticipantesManager onMessage={setMessage} />}
+      <div className="tab-content-gerenciar">
+        {activeTab === 'empresas' && <EmpresasManager onMessage={handleMessage} />}
+        {activeTab === 'produtos' && <ProdutosManager onMessage={handleMessage} />}
+        {activeTab === 'participantes' && <ParticipantesManager onMessage={handleMessage} />}
       </div>
     </div>
   )
@@ -142,99 +164,124 @@ function EmpresasManager({ onMessage }) {
     }
   }
 
-  if (loading) return <div>Carregando...</div>
+  if (loading) return (
+    <div className="loading-state">
+      <div className="loading-spinner"></div>
+      <p>CARREGANDO DADOS...</p>
+    </div>
+  )
 
   return (
-    <div>
-      <div className="form-container">
-        <div className="form-header">
-          <h3>{isEditing ? 'Editar Empresa' : 'Adicionar Nova Empresa'}</h3>
+    <div className="manager-container">
+      <div className="form-card">
+        <div className="form-card-header" onClick={() => setIsFormExpanded(!isFormExpanded)}>
+          <div className="form-card-title">
+            <span className="form-icon">▼</span>
+            <h3>{isEditing ? 'EDITAR EMPRESA' : 'NOVA EMPRESA'}</h3>
+          </div>
           <button 
             type="button" 
-            className="btn btn-primary btn-toggle"
-            onClick={() => setIsFormExpanded(!isFormExpanded)}
+            className="btn-toggle-form"
           >
-            {isFormExpanded ? '−' : '+'}
+            {isFormExpanded ? '▲' : '▼'}
           </button>
         </div>
+        
         {isFormExpanded && (
-          <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="nome">Nome:</label>
-            <input
-              type="text"
-              id="nome"
-              className="form-control"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="descricao">Descrição:</label>
-            <textarea
-              id="descricao"
-              className="form-control"
-              value={formData.descricao}
-              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-            />
-          </div>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-success">
-              {isEditing ? 'Atualizar' : 'Adicionar'}
-            </button>
-            {isEditing && (
-              <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
-                Cancelar
+          <form onSubmit={handleSubmit} className="form-modern">
+            <div className="form-row">
+              <div className="form-field">
+                <label htmlFor="nome">NOME DA EMPRESA</label>
+                <input
+                  type="text"
+                  id="nome"
+                  className="input-modern"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  placeholder="Digite o nome da empresa..."
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-field">
+                <label htmlFor="descricao">DESCRIÇÃO</label>
+                <textarea
+                  id="descricao"
+                  className="textarea-modern"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                  placeholder="Adicione uma descrição (opcional)..."
+                  rows="4"
+                />
+              </div>
+            </div>
+            
+            <div className="form-actions-modern">
+              <button type="submit" className="btn btn-success">
+                {isEditing ? '✓ ATUALIZAR' : '+ ADICIONAR'}
               </button>
-            )}
-          </div>
-        </form>
+              {isEditing && (
+                <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
+                  ✕ CANCELAR
+                </button>
+              )}
+            </div>
+          </form>
         )}
       </div>
 
-      <div className="table-container">
-        <h3>Empresas Cadastradas</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {empresas.length === 0 ? (
-              <tr>
-                <td colSpan="3" style={{ textAlign: 'center', padding: '2rem' }}>
-                  Nenhuma empresa cadastrada
-                </td>
-              </tr>
-            ) : (
-              empresas.map(empresa => (
-                <tr key={empresa.id}>
-                  <td>{empresa.nome}</td>
-                  <td>{empresa.descricao || '-'}</td>
-                  <td>
+      <div className="data-section">
+        <div className="section-header">
+          <h3>EMPRESAS CADASTRADAS</h3>
+          <span className="count-badge">{empresas.length}</span>
+        </div>
+        
+        {empresas.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">□</div>
+            <p>Nenhuma empresa cadastrada</p>
+            <span className="empty-hint">Clique em "Nova Empresa" para começar</span>
+          </div>
+        ) : (
+          <div className="data-table-modern">
+            <div className="table-header-modern">
+              <div className="col-empresa-nome">EMPRESA</div>
+              <div className="col-empresa-desc">DESCRIÇÃO</div>
+              <div className="col-empresa-actions">AÇÕES</div>
+            </div>
+            <div className="table-body-modern">
+              {empresas.map(empresa => (
+                <div key={empresa.id} className="table-row-modern">
+                  <div className="col-empresa-nome">
+                    <span className="empresa-marker">■</span>
+                    <span className="empresa-name">{empresa.nome}</span>
+                  </div>
+                  <div className="col-empresa-desc">
+                    {empresa.descricao || <span className="text-muted">—</span>}
+                  </div>
+                  <div className="col-empresa-actions">
                     <button 
-                      className="btn btn-primary"
+                      className="btn-action btn-edit"
                       onClick={() => editarEmpresa(empresa)}
-                      style={{ marginRight: '0.5rem' }}
+                      title="Editar empresa"
                     >
-                      Editar
+                      EDITAR
                     </button>
                     <button 
-                      className="btn btn-danger"
+                      className="btn-action btn-delete"
                       onClick={() => excluirEmpresa(empresa.id)}
+                      title="Excluir empresa"
                     >
-                      Excluir
+                      EXCLUIR
                     </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -399,158 +446,187 @@ function ProdutosManager({ onMessage }) {
     }
   }
 
-  if (loading) return <div>Carregando...</div>
+  if (loading) return (
+    <div className="loading-state">
+      <div className="loading-spinner"></div>
+      <p>CARREGANDO DADOS...</p>
+    </div>
+  )
 
   return (
-    <div>
-      <div className="form-container">
-        <div className="form-header">
-          <h3>{isEditing ? 'Editar Produto' : 'Adicionar Novo Produto'}</h3>
+    <div className="manager-container">
+      <div className="form-card">
+        <div className="form-card-header" onClick={() => setIsFormExpanded(!isFormExpanded)}>
+          <div className="form-card-title">
+            <span className="form-icon">▼</span>
+            <h3>{isEditing ? 'EDITAR PRODUTO' : 'NOVO PRODUTO'}</h3>
+          </div>
           <button 
             type="button" 
-            className="btn btn-primary btn-toggle"
-            onClick={() => setIsFormExpanded(!isFormExpanded)}
+            className="btn-toggle-form"
           >
-            {isFormExpanded ? '−' : '+'}
+            {isFormExpanded ? '▲' : '▼'}
           </button>
         </div>
+        
         {isFormExpanded && (
-          <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="nome">Nome:</label>
-            <input
-              type="text"
-              id="nome"
-              className="form-control"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="empresa_id">Empresa:</label>
-            <select
-              id="empresa_id"
-              className="form-control"
-              value={formData.empresa_id}
-              onChange={(e) => setFormData({ ...formData, empresa_id: e.target.value })}
-              required
-            >
-              <option value="">Selecione uma empresa</option>
-              {empresas.map(empresa => (
-                <option key={empresa.id} value={empresa.id}>
-                  {empresa.nome}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label htmlFor="descricao">Descrição:</label>
-            <textarea
-              id="descricao"
-              className="form-control"
-              value={formData.descricao}
-              onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
-            />
-          </div>
-
-          {/* Seção de Participantes - Apenas ao editar */}
-          {isEditing && (
-            <div className="produto-participantes-section">
-              <h4>Participantes do Produto</h4>
-              <div className="participantes-checkboxes">
-                {participantes.map(participante => {
-                  const isAssociado = participantesProduto.some(p => p.id === participante.id)
-                  return (
-                    <div key={participante.id} className="participante-checkbox-item">
-                      <input
-                        type="checkbox"
-                        id={`participante-${participante.id}`}
-                        checked={isAssociado}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            associarParticipante(formData.id, participante.id)
-                          } else {
-                            desassociarParticipante(formData.id, participante.id)
-                          }
-                        }}
-                      />
-                      <label htmlFor={`participante-${participante.id}`}>
-                        <span className="participante-nome">{participante.nome}</span>
-                        {participante.email && (
-                          <span className="participante-email"> ({participante.email})</span>
-                        )}
-                      </label>
-                    </div>
-                  )
-                })}
+          <form onSubmit={handleSubmit} className="form-modern">
+            <div className="form-row-double">
+              <div className="form-field">
+                <label htmlFor="nome">NOME DO PRODUTO</label>
+                <input
+                  type="text"
+                  id="nome"
+                  className="input-modern"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  placeholder="Digite o nome do produto..."
+                  required
+                />
               </div>
-              {participantes.length === 0 && (
-                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                  Nenhum participante cadastrado. Vá na aba "Participantes" para criar novos.
-                </p>
+              <div className="form-field">
+                <label htmlFor="empresa_id">EMPRESA</label>
+                <select
+                  id="empresa_id"
+                  className="select-modern"
+                  value={formData.empresa_id}
+                  onChange={(e) => setFormData({ ...formData, empresa_id: e.target.value })}
+                  required
+                >
+                  <option value="">Selecione uma empresa</option>
+                  {empresas.map(empresa => (
+                    <option key={empresa.id} value={empresa.id}>
+                      {empresa.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-field">
+                <label htmlFor="descricao">DESCRIÇÃO</label>
+                <textarea
+                  id="descricao"
+                  className="textarea-modern"
+                  value={formData.descricao}
+                  onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                  placeholder="Adicione uma descrição (opcional)..."
+                  rows="4"
+                />
+              </div>
+            </div>
+
+            {/* Seção de Participantes - Apenas ao editar */}
+            {isEditing && (
+              <div className="participantes-section">
+                <div className="participantes-header">
+                  <h4>PARTICIPANTES DO PRODUTO</h4>
+                  <span className="participantes-count">{participantesProduto.length} selecionados</span>
+                </div>
+                <div className="participantes-grid">
+                  {participantes.map(participante => {
+                    const isAssociado = participantesProduto.some(p => p.id === participante.id)
+                    return (
+                      <div key={participante.id} className="checkbox-card">
+                        <input
+                          type="checkbox"
+                          id={`participante-${participante.id}`}
+                          checked={isAssociado}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              associarParticipante(formData.id, participante.id)
+                            } else {
+                              desassociarParticipante(formData.id, participante.id)
+                            }
+                          }}
+                        />
+                        <label htmlFor={`participante-${participante.id}`} className="checkbox-label">
+                          <span className="checkbox-name">{participante.nome}</span>
+                          {participante.email && (
+                            <span className="checkbox-email">{participante.email}</span>
+                          )}
+                        </label>
+                      </div>
+                    )
+                  })}
+                </div>
+                {participantes.length === 0 && (
+                  <div className="empty-hint-box">
+                    Nenhum participante cadastrado. Vá na aba "Participantes" para criar novos.
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="form-actions-modern">
+              <button type="submit" className="btn btn-success">
+                {isEditing ? '✓ ATUALIZAR' : '+ ADICIONAR'}
+              </button>
+              {isEditing && (
+                <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
+                  ✕ CANCELAR
+                </button>
               )}
             </div>
-          )}
-
-          <div className="form-actions">
-            <button type="submit" className="btn btn-success">
-              {isEditing ? 'Atualizar' : 'Adicionar'}
-            </button>
-            {isEditing && (
-              <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
-                Cancelar
-              </button>
-            )}
-          </div>
-        </form>
+          </form>
         )}
       </div>
 
-      <div className="table-container">
-        <h3>Produtos Cadastrados</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Empresa</th>
-              <th>Descrição</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {produtos.length === 0 ? (
-              <tr>
-                <td colSpan="4" style={{ textAlign: 'center', padding: '2rem' }}>
-                  Nenhum produto cadastrado
-                </td>
-              </tr>
-            ) : (
-              produtos.map(produto => (
-                <tr key={produto.id}>
-                  <td>{produto.nome}</td>
-                  <td>{produto.empresas?.nome || '-'}</td>
-                  <td>{produto.descricao || '-'}</td>
-                  <td>
+      <div className="data-section">
+        <div className="section-header">
+          <h3>PRODUTOS CADASTRADOS</h3>
+          <span className="count-badge">{produtos.length}</span>
+        </div>
+        
+        {produtos.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">□</div>
+            <p>Nenhum produto cadastrado</p>
+            <span className="empty-hint">Clique em "Novo Produto" para começar</span>
+          </div>
+        ) : (
+          <div className="data-table-modern">
+            <div className="table-header-modern">
+              <div className="col-produto-nome">PRODUTO</div>
+              <div className="col-produto-empresa">EMPRESA</div>
+              <div className="col-produto-desc">DESCRIÇÃO</div>
+              <div className="col-produto-actions">AÇÕES</div>
+            </div>
+            <div className="table-body-modern">
+              {produtos.map(produto => (
+                <div key={produto.id} className="table-row-modern">
+                  <div className="col-produto-nome">
+                    <span className="produto-marker">■</span>
+                    <span className="produto-name">{produto.nome}</span>
+                  </div>
+                  <div className="col-produto-empresa">
+                    {produto.empresas?.nome || <span className="text-muted">—</span>}
+                  </div>
+                  <div className="col-produto-desc">
+                    {produto.descricao || <span className="text-muted">—</span>}
+                  </div>
+                  <div className="col-produto-actions">
                     <button 
-                      className="btn btn-primary"
+                      className="btn-action btn-edit"
                       onClick={() => editarProduto(produto)}
-                      style={{ marginRight: '0.5rem' }}
+                      title="Editar produto"
                     >
-                      Editar
+                      EDITAR
                     </button>
                     <button 
-                      className="btn btn-danger"
+                      className="btn-action btn-delete"
                       onClick={() => excluirProduto(produto.id)}
+                      title="Excluir produto"
                     >
-                      Excluir
+                      EXCLUIR
                     </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -651,100 +727,121 @@ function ParticipantesManager({ onMessage }) {
     }
   }
 
-  if (loading) return <div>Carregando...</div>
+  if (loading) return (
+    <div className="loading-state">
+      <div className="loading-spinner"></div>
+      <p>CARREGANDO DADOS...</p>
+    </div>
+  )
 
   return (
-    <div>
-      <div className="form-container">
-        <div className="form-header">
-          <h3>{isEditing ? 'Editar Participante' : 'Adicionar Novo Participante'}</h3>
+    <div className="manager-container">
+      <div className="form-card">
+        <div className="form-card-header" onClick={() => setIsFormExpanded(!isFormExpanded)}>
+          <div className="form-card-title">
+            <span className="form-icon">▼</span>
+            <h3>{isEditing ? 'EDITAR PARTICIPANTE' : 'NOVO PARTICIPANTE'}</h3>
+          </div>
           <button 
             type="button" 
-            className="btn btn-primary btn-toggle"
-            onClick={() => setIsFormExpanded(!isFormExpanded)}
+            className="btn-toggle-form"
           >
-            {isFormExpanded ? '−' : '+'}
+            {isFormExpanded ? '▲' : '▼'}
           </button>
         </div>
+        
         {isFormExpanded && (
-          <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="nome">Nome:</label>
-            <input
-              type="text"
-              id="nome"
-              className="form-control"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="email">E-mail:</label>
-            <input
-              type="email"
-              id="email"
-              className="form-control"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            />
-          </div>
-          <div className="form-actions">
-            <button type="submit" className="btn btn-success">
-              {isEditing ? 'Atualizar' : 'Adicionar'}
-            </button>
-            {isEditing && (
-              <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
-                Cancelar
+          <form onSubmit={handleSubmit} className="form-modern">
+            <div className="form-row-double">
+              <div className="form-field">
+                <label htmlFor="nome">NOME COMPLETO</label>
+                <input
+                  type="text"
+                  id="nome"
+                  className="input-modern"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  placeholder="Digite o nome completo..."
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="email">E-MAIL</label>
+                <input
+                  type="email"
+                  id="email"
+                  className="input-modern"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="exemplo@email.com"
+                />
+              </div>
+            </div>
+            
+            <div className="form-actions-modern">
+              <button type="submit" className="btn btn-success">
+                {isEditing ? '✓ ATUALIZAR' : '+ ADICIONAR'}
               </button>
-            )}
-          </div>
-        </form>
+              {isEditing && (
+                <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
+                  ✕ CANCELAR
+                </button>
+              )}
+            </div>
+          </form>
         )}
       </div>
 
-      <div className="table-container">
-        <h3>Participantes Cadastrados</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>E-mail</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {participantes.length === 0 ? (
-              <tr>
-                <td colSpan="3" style={{ textAlign: 'center', padding: '2rem' }}>
-                  Nenhum participante cadastrado
-                </td>
-              </tr>
-            ) : (
-              participantes.map(participante => (
-                <tr key={participante.id}>
-                  <td>{participante.nome}</td>
-                  <td>{participante.email || '-'}</td>
-                  <td>
+      <div className="data-section">
+        <div className="section-header">
+          <h3>PARTICIPANTES CADASTRADOS</h3>
+          <span className="count-badge">{participantes.length}</span>
+        </div>
+        
+        {participantes.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">□</div>
+            <p>Nenhum participante cadastrado</p>
+            <span className="empty-hint">Clique em "Novo Participante" para começar</span>
+          </div>
+        ) : (
+          <div className="data-table-modern">
+            <div className="table-header-modern">
+              <div className="col-participante-nome">PARTICIPANTE</div>
+              <div className="col-participante-email">E-MAIL</div>
+              <div className="col-participante-actions">AÇÕES</div>
+            </div>
+            <div className="table-body-modern">
+              {participantes.map(participante => (
+                <div key={participante.id} className="table-row-modern">
+                  <div className="col-participante-nome">
+                    <span className="participante-marker">■</span>
+                    <span className="participante-name">{participante.nome}</span>
+                  </div>
+                  <div className="col-participante-email">
+                    {participante.email || <span className="text-muted">—</span>}
+                  </div>
+                  <div className="col-participante-actions">
                     <button 
-                      className="btn btn-primary"
+                      className="btn-action btn-edit"
                       onClick={() => editarParticipante(participante)}
-                      style={{ marginRight: '0.5rem' }}
+                      title="Editar participante"
                     >
-                      Editar
+                      EDITAR
                     </button>
                     <button 
-                      className="btn btn-danger"
+                      className="btn-action btn-delete"
                       onClick={() => excluirParticipante(participante.id)}
+                      title="Excluir participante"
                     >
-                      Excluir
+                      EXCLUIR
                     </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
