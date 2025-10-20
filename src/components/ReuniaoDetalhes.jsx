@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../services/supabase'
+import { obterTagsReuniao, listarTags, atualizarTagsReuniao } from '../services/tagsService'
 import emailjs from '@emailjs/browser'
 import { EMAILJS_CONFIG } from '../config/emailjs'
 
@@ -9,6 +10,9 @@ function ReuniaoDetalhes() {
   const navigate = useNavigate()
   const [reuniao, setReuniao] = useState(null)
   const [participantes, setParticipantes] = useState([])
+  const [tags, setTags] = useState([])
+  const [todasTags, setTodasTags] = useState([])
+  const [editandoTags, setEditandoTags] = useState(false)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [isEditingIA, setIsEditingIA] = useState(false)
@@ -17,7 +21,8 @@ function ReuniaoDetalhes() {
   const [emailData, setEmailData] = useState({
     destinatario: '',
     assunto: '',
-    showEmailForm: false
+    showEmailForm: false,
+    incluirResumoConciso: false
   })
   const [participantesEmpresa, setParticipantesEmpresa] = useState([])
   const [emailsDestinatarios, setEmailsDestinatarios] = useState([]) // Array de strings de emails
@@ -77,6 +82,22 @@ function ReuniaoDetalhes() {
 
       const participantesReuniao = participantesData?.map(p => p.participantes) || []
       setParticipantes(participantesReuniao)
+
+      // Carregar tags da reunião
+      const { data: tagsData, error: tagsError } = await obterTagsReuniao(id)
+      if (tagsError) {
+        console.error('Erro ao carregar tags:', tagsError)
+      } else {
+        setTags(tagsData || [])
+      }
+
+      // Carregar todas as tags disponíveis
+      const { data: todasTagsData, error: todasTagsError } = await listarTags()
+      if (todasTagsError) {
+        console.error('Erro ao carregar todas as tags:', todasTagsError)
+      } else {
+        setTodasTags(todasTagsData || [])
+      }
 
       // Carregar participantes do produto (se houver)
       if (reuniaoData.produto_id) {
@@ -149,6 +170,38 @@ function ReuniaoDetalhes() {
       console.error('Erro ao atualizar status:', error)
       setMessage('Erro ao atualizar status: ' + error.message)
     }
+  }
+
+  const salvarTags = async (novasTags) => {
+    try {
+      setSaving(true)
+      
+      const { error } = await atualizarTagsReuniao(id, novasTags)
+      if (error) throw error
+
+      // Recarregar tags da reunião
+      const { data: tagsData, error: tagsError } = await obterTagsReuniao(id)
+      if (tagsError) throw tagsError
+
+      setTags(tagsData || [])
+      setEditandoTags(false)
+      setMessage('Tags atualizadas com sucesso!')
+    } catch (error) {
+      console.error('Erro ao salvar tags:', error)
+      setMessage('Erro ao salvar tags: ' + error.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const getContrastColor = (hexColor) => {
+    if (!hexColor) return '#000'
+    const color = hexColor.replace('#', '')
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    const luminosity = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminosity > 0.5 ? '#000' : '#fff'
   }
 
   const salvarResumoIA = async () => {
@@ -311,7 +364,19 @@ function ReuniaoDetalhes() {
       setMessage('Enviando e-mails...')
 
       const { SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY } = EMAILJS_CONFIG
-      const conteudoHTML = document.getElementById('resumo-ia-content').innerHTML
+      let conteudoHTML = document.getElementById('resumo-ia-content').innerHTML
+      
+      // Se o checkbox estiver marcado, adicionar o resumo conciso no início
+      if (emailData.incluirResumoConciso && reuniao.resumo_conciso) {
+        const resumoConcisoHTML = `
+          <div style="background-color: #f9fafb; border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000;">RESUMO CONCISO</h3>
+            <p style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${reuniao.resumo_conciso}</p>
+          </div>
+        `
+        conteudoHTML = resumoConcisoHTML + conteudoHTML
+      }
+      
       const assuntoEmail = emailData.assunto || `Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`
 
       // Enviar para cada destinatário
@@ -559,13 +624,46 @@ function ReuniaoDetalhes() {
         <div className="detalhes-card">
           <div className="detalhes-header">
             <h3>Informações Básicas</h3>
-            <button 
-              className={`status-badge status-clickable ${reuniao.status === 'tratada' ? 'status-tratada' : 'status-pendente'}`}
-              onClick={marcarComoTratada}
-              title={`Clique para marcar como ${reuniao.status === 'tratada' ? 'pendente' : 'tratada'}`}
-            >
-              {reuniao.status === 'tratada' ? 'Tratada' : 'Pendente'}
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              {/* Tags */}
+              {tags.length > 0 && (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  {tags.map(tag => (
+                    <span
+                      key={tag.id}
+                      className="tag-badge"
+                      style={{
+                        backgroundColor: tag.cor,
+                        color: getContrastColor(tag.cor),
+                        border: `2px solid ${tag.cor}`,
+                        marginTop: `2px`,
+                        borderTop: `4px solid ${tag.cor}`
+                      }}
+                    >
+                      {tag.nome}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              {/* Botão para editar tags */}
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={() => setEditandoTags(!editandoTags)}
+                style={{ fontSize: '0.75rem', padding: '0.5rem 0.75rem' }}
+              >
+                {editandoTags ? '✕' : '🏷️'} Tags
+              </button>
+              
+              {/* Status */}
+              <button 
+                className={`status-badge status-clickable ${reuniao.status === 'tratada' ? 'status-tratada' : 'status-pendente'}`}
+                onClick={marcarComoTratada}
+                title={`Clique para marcar como ${reuniao.status === 'tratada' ? 'pendente' : 'tratada'}`}
+              >
+                {reuniao.status === 'tratada' ? 'Tratada' : 'Pendente'}
+              </button>
+            </div>
           </div>
           <div className="detalhes-grid">
             <div className="detalhe-item">
@@ -601,6 +699,69 @@ function ReuniaoDetalhes() {
           </div>
         </div>
 
+        {/* Modal de Edição de Tags */}
+        {editandoTags && (
+          <div className="detalhes-card" style={{ marginTop: '1rem' }}>
+            <div className="detalhes-header">
+              <h3>Editar Tags da Reunião</h3>
+              <button 
+                className="btn btn-primary btn-sm"
+                onClick={() => setEditandoTags(false)}
+              >
+                ✕ Fechar
+              </button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                {todasTags.map(tag => {
+                  const isSelected = tags.some(t => t.id === tag.id)
+                  return (
+                    <div 
+                      key={tag.id} 
+                      className={`tag-checkbox-card ${isSelected ? 'selected' : ''}`}
+                      onClick={() => {
+                        const newTags = isSelected
+                          ? tags.filter(t => t.id !== tag.id)
+                          : [...tags, tag]
+                        salvarTags(newTags.map(t => t.id))
+                      }}
+                      style={{
+                        backgroundColor: isSelected ? tag.cor : '#fff',
+                        color: isSelected ? getContrastColor(tag.cor) : '#000',
+                        border: `2px solid ${isSelected ? tag.cor : '#d1d5db'}`,
+                        cursor: 'pointer',
+                        padding: '0.75rem 1rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        id={`tag-${tag.id}`}
+                        checked={isSelected}
+                        onChange={() => {}}
+                        style={{ marginRight: '0.5rem' }}
+                      />
+                      <label htmlFor={`tag-${tag.id}`} style={{ cursor: 'pointer', fontWeight: '600' }}>
+                        {tag.nome}
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
+              {todasTags.length === 0 && (
+                <p style={{ 
+                  color: '#6b7280', 
+                  fontSize: '0.875rem', 
+                  fontStyle: 'italic',
+                  textAlign: 'center',
+                  padding: '2rem'
+                }}>
+                  Nenhuma tag cadastrada. Vá em Gerenciar → Tags para criar novas tags.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Card de Resumo IA - Movido para o topo */}
         {reuniao.resumo_ia && (
@@ -686,6 +847,21 @@ function ReuniaoDetalhes() {
             {emailData.showEmailForm && (
               <div className="email-form">
                 <h4>Enviar Resumo por E-mail</h4>
+
+                {/* Opção de incluir Resumo Conciso */}
+                <div className="form-group">
+                  <div className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      id="incluir-resumo-conciso"
+                      checked={emailData.incluirResumoConciso}
+                      onChange={(e) => setEmailData({ ...emailData, incluirResumoConciso: e.target.checked })}
+                    />
+                    <label htmlFor="incluir-resumo-conciso">
+                      Incluir Resumo Conciso acima do template
+                    </label>
+                  </div>
+                </div>
 
                 {/* Histórico de Envios */}
                 {historicoEmails.length > 0 && (

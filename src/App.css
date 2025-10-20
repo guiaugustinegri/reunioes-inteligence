@@ -319,7 +319,7 @@ textarea.form-control.large {
 }
 
 .select-filter {
-  min-width: 150px;
+  min-width: 120px;
 }
 
 .date-input:focus,

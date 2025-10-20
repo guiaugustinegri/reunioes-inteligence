@@ -73,10 +73,61 @@ Agora o botão "Enviar E-mail" na página de Resumo IA funcionará perfeitamente
 
 1. Na lista de reuniões → Clique em "Resumo IA"
 2. Clique em "Enviar E-mail"
-3. Digite o e-mail do destinatário
-4. Personalize o assunto (opcional)
-5. Clique em "Enviar"
-6. O e-mail será enviado automaticamente!
+3. **NOVO**: Marque o checkbox "Incluir Resumo Conciso acima do template" (opcional)
+4. Digite o e-mail do destinatário
+5. Personalize o assunto (opcional)
+6. Clique em "Enviar"
+7. O e-mail será enviado automaticamente!
+
+## 📋 Resumo Conciso
+
+### ✅ Funcionalidade Implementada
+
+Agora você pode incluir o **Resumo Conciso** no e-mail:
+
+- **Checkbox**: "Incluir Resumo Conciso acima do template"
+- **Posição**: Aparece no início do e-mail, antes do resumo IA completo
+- **Estilo**: Segue o design system do projeto (bordas pretas, fonte Courier New)
+- **Condição**: Só aparece se a reunião tiver um resumo conciso cadastrado
+
+### 🎨 Como Fica no E-mail
+
+Quando marcado, o e-mail terá esta estrutura:
+
+```
+┌─────────────────────────────────────┐
+│ RESUMO CONCISO                      │
+│ [Conteúdo do resumo conciso]        │
+└─────────────────────────────────────┘
+
+[Resumo IA completo em HTML]
+```
+
+### 🔧 Template Recomendado
+
+Para melhor compatibilidade, use este template no EmailJS:
+
+```html
+Assunto: {{subject}}
+
+Olá,
+
+Segue o resumo da reunião conforme solicitado:
+
+{{message}}
+
+---
+Detalhes da Reunião:
+- Título: {{reuniao_titulo}}
+- Empresa: {{empresa}}
+- Produto: {{produto}}
+- Data: {{data}}
+
+Atenciosamente,
+[Seu Nome]
+```
+
+**Nota**: O `{{message}}` já inclui o resumo conciso (se selecionado) + o resumo IA completo.
 
 ## 🔧 Alternativas
 

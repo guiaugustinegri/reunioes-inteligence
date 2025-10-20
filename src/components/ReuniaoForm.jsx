@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import { seriesService } from '../services/seriesService'
+import { listarTags, obterTagsReuniao, atualizarTagsReuniao } from '../services/tagsService'
 
 function ReuniaoForm() {
   const { id } = useParams()
@@ -20,13 +21,15 @@ function ReuniaoForm() {
     produto_id: '',
     serie_id: '',
     status: 'pendente',
-    participantes: []
+    participantes: [],
+    tags: []
   })
 
   const [empresas, setEmpresas] = useState([])
   const [produtos, setProdutos] = useState([])
   const [series, setSeries] = useState([])
   const [participantes, setParticipantes] = useState([])
+  const [tags, setTags] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -69,10 +72,15 @@ function ReuniaoForm() {
       const { data: seriesData, error: seriesError } = await seriesService.listarSeriesCompletas()
       if (seriesError) throw seriesError
 
+      // Carregar tags
+      const { data: tagsData, error: tagsError } = await listarTags()
+      if (tagsError) throw tagsError
+
       setEmpresas(empresasData || [])
       setProdutos(produtosData || [])
       setSeries(seriesData || [])
       setParticipantes(participantesData || [])
+      setTags(tagsData || [])
 
       // Se está editando, carregar dados da reunião
       if (isEdit) {
@@ -98,7 +106,8 @@ function ReuniaoForm() {
             produto_id: reuniaoData.produto_id || '',
             serie_id: reuniaoData.serie_id || '',
             status: reuniaoData.status || 'pendente',
-            participantes: []
+            participantes: [],
+            tags: []
           })
 
           // Carregar participantes da reunião
@@ -109,9 +118,14 @@ function ReuniaoForm() {
 
           if (participantesReuniaoError) throw participantesReuniaoError
 
+          // Carregar tags da reunião
+          const { data: tagsReuniao, error: tagsReuniaoError } = await obterTagsReuniao(id)
+          if (tagsReuniaoError) throw tagsReuniaoError
+
           setFormData(prev => ({
             ...prev,
-            participantes: participantesReuniao?.map(p => p.participante_id) || []
+            participantes: participantesReuniao?.map(p => p.participante_id) || [],
+            tags: tagsReuniao?.map(t => t.id) || []
           }))
         }
       }
@@ -187,6 +201,16 @@ function ReuniaoForm() {
     }
   }
 
+  // Função para determinar se o texto deve ser branco ou preto baseado na cor de fundo
+  const getContrastColor = (hexColor) => {
+    const color = hexColor.replace('#', '')
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    const luminosity = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminosity > 0.5 ? '#000' : '#fff'
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -253,6 +277,10 @@ function ReuniaoForm() {
 
           if (participantesError) throw participantesError
         }
+
+        // Gerenciar tags
+        const { error: tagsError } = await atualizarTagsReuniao(reuniaoId, formData.tags)
+        if (tagsError) throw tagsError
       }
 
       setMessage(isEdit ? 'Reunião atualizada com sucesso!' : 'Reunião criada com sucesso!')
@@ -468,6 +496,59 @@ function ReuniaoForm() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Seção de Tags */}
+        <div className="form-group">
+          <label>Tags:</label>
+          <div className="tags-selection-grid">
+            {tags.map(tag => {
+              const isSelected = formData.tags.includes(tag.id)
+              const contrastColor = getContrastColor(tag.cor)
+              
+              return (
+                <div 
+                  key={tag.id} 
+                  className={`tag-checkbox-card ${isSelected ? 'selected' : ''}`}
+                  onClick={() => {
+                    const newTags = isSelected
+                      ? formData.tags.filter(t => t !== tag.id)
+                      : [...formData.tags, tag.id]
+                    setFormData({ ...formData, tags: newTags })
+                  }}
+                  style={{
+                    backgroundColor: isSelected ? tag.cor : '#fff',
+                    color: isSelected ? contrastColor : '#000',
+                    border: `2px solid ${isSelected ? tag.cor : '#d1d5db'}`,
+                    cursor: 'pointer',
+                    padding: '0.75rem 1rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    id={`tag-${tag.id}`}
+                    checked={isSelected}
+                    onChange={() => {}}
+                    style={{ marginRight: '0.5rem' }}
+                  />
+                  <label htmlFor={`tag-${tag.id}`} style={{ cursor: 'pointer', fontWeight: '600' }}>
+                    {tag.nome}
+                  </label>
+                </div>
+              )
+            })}
+          </div>
+          {tags.length === 0 && (
+            <p style={{ 
+              color: '#6b7280', 
+              fontSize: '0.875rem', 
+              fontStyle: 'italic',
+              marginTop: '0.5rem' 
+            }}>
+              Nenhuma tag cadastrada. Vá em Gerenciar → Tags para criar novas tags.
+            </p>
+          )}
         </div>
 
         <div className="form-group">

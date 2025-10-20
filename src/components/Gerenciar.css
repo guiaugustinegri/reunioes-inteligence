@@ -582,6 +582,13 @@
   gap: 1.5rem;
 }
 
+/* Grid Templates para Tags */
+.table-header-modern:has(.col-tag-nome),
+.table-row-modern:has(.col-tag-nome) {
+  grid-template-columns: 2fr 200px 160px;
+  gap: 1.5rem;
+}
+
 /* Estilos de coluna compartilhados */
 .col-empresa-nome,
 .col-produto-nome,
@@ -658,6 +665,89 @@
 
 .btn-delete {
   /* Usa o estilo base */
+}
+
+/* ========================================
+   TAGS - ESTILOS ESPECÍFICOS
+   ======================================== */
+
+/* Color picker wrapper */
+.color-input-wrapper {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.color-picker {
+  width: 60px;
+  height: 48px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: border-color 0.2s ease;
+}
+
+.color-picker:hover,
+.color-picker:focus {
+  border-color: #000;
+  outline: none;
+}
+
+.color-text-input {
+  flex: 1;
+  font-size: 0.875rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  color: #000;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.color-text-input:focus {
+  border-color: #000;
+  outline: none;
+}
+
+.color-preview {
+  width: 48px;
+  height: 48px;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+/* Tag badge large (para tabela de gerenciamento) */
+.tag-badge-large {
+  display: inline-block;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 0;
+  transition: transform 0.2s ease;
+}
+
+.tag-badge-large:hover {
+  transform: scale(1.05);
+}
+
+/* Tag color code */
+.tag-color-code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.col-tag-nome,
+.col-tag-cor {
+  display: flex;
+  align-items: center;
 }
 
 /* ========================================

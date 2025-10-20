@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
+import { listarTags } from '../services/tagsService'
 
 function ReunioesLista() {
   const navigate = useNavigate()
   const [reunioes, setReunioes] = useState([])
   const [empresas, setEmpresas] = useState([])
   const [produtos, setProdutos] = useState([])
+  const [tags, setTags] = useState([])
+  const [reunioesTags, setReunioesTags] = useState({})
   const [filtroEmpresa, setFiltroEmpresa] = useState('')
   const [filtroProduto, setFiltroProduto] = useState('')
+  const [filtroTags, setFiltroTags] = useState([])
+  const [filtroTag, setFiltroTag] = useState('')
   const [buscaLivre, setBuscaLivre] = useState('')
   const [dataInicio, setDataInicio] = useState('')
   const [dataFim, setDataFim] = useState('')
@@ -54,9 +59,35 @@ function ReunioesLista() {
 
       if (produtosError) throw produtosError
 
+      // Carregar tags
+      const { data: tagsData, error: tagsError } = await listarTags()
+      if (tagsError) throw tagsError
+
+      // Carregar tags de todas as reuniões
+      const { data: reunioesTagsData, error: reunioesTagsError } = await supabase
+        .from('reuniao_tags')
+        .select(`
+          reuniao_id,
+          tag_id,
+          tags (*)
+        `)
+
+      if (reunioesTagsError) throw reunioesTagsError
+
+      // Organizar tags por reunião
+      const tagsMap = {}
+      reunioesTagsData?.forEach(rt => {
+        if (!tagsMap[rt.reuniao_id]) {
+          tagsMap[rt.reuniao_id] = []
+        }
+        tagsMap[rt.reuniao_id].push(rt.tags)
+      })
+
       setReunioes(reunioesData || [])
       setEmpresas(empresasData || [])
       setProdutos(produtosData || [])
+      setTags(tagsData || [])
+      setReunioesTags(tagsMap)
     } catch (error) {
       console.error('Erro ao carregar dados:', error)
       setMessage('Erro ao carregar dados: ' + error.message)
@@ -163,6 +194,17 @@ function ReunioesLista() {
     return `${dia}/${mes}`
   }
 
+  const getContrastColor = (hexColor) => {
+    if (!hexColor) return '#000'
+    const color = hexColor.replace('#', '')
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    const luminosity = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminosity > 0.5 ? '#000' : '#fff'
+  }
+
+
   const reunioesFiltradas = reunioes.filter(reuniao => {
     // Filtro por empresa
     const matchEmpresa = !filtroEmpresa || reuniao.empresa_id === filtroEmpresa
@@ -192,7 +234,22 @@ function ReunioesLista() {
     // Filtro por status
     const matchStatus = !filtroStatus || reuniao.status === filtroStatus
     
-    return matchEmpresa && matchProduto && matchBusca && matchDataInicio && matchDataFim && matchStatus
+    // Filtro por tag (filtrar ou excluir)
+    let matchTag = true
+    if (filtroTag) {
+      if (filtroTag.startsWith('excluir-')) {
+        // Excluir: reunião NÃO deve ter esta tag
+        const tagId = filtroTag.replace('excluir-', '')
+        matchTag = !reunioesTags[reuniao.id] || 
+          !reunioesTags[reuniao.id].some(tag => tag.id === tagId)
+      } else {
+        // Filtrar: reunião deve ter esta tag
+        matchTag = reunioesTags[reuniao.id] && 
+          reunioesTags[reuniao.id].some(tag => tag.id === filtroTag)
+      }
+    }
+    
+    return matchEmpresa && matchProduto && matchBusca && matchDataInicio && matchDataFim && matchStatus && matchTag
   })
 
   const produtosFiltrados = filtroEmpresa 
@@ -321,7 +378,29 @@ function ReunioesLista() {
             <option value="tratada">Tratada</option>
           </select>
 
-          {(buscaLivre || dataInicio || dataFim || filtroEmpresa || filtroProduto || filtroStatus) && (
+          <select 
+            className="select-filter"
+            value={filtroTag}
+            onChange={(e) => setFiltroTag(e.target.value)}
+          >
+            <option value="">Todas as tags</option>
+            <optgroup label="Filtrar por tag:">
+              {tags.map(tag => (
+                <option key={tag.id} value={tag.id}>
+                  {tag.nome}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Excluir tag:">
+              {tags.map(tag => (
+                <option key={`excluir-${tag.id}`} value={`excluir-${tag.id}`}>
+                  Excluir: {tag.nome}
+                </option>
+              ))}
+            </optgroup>
+          </select>
+
+          {(buscaLivre || dataInicio || dataFim || filtroEmpresa || filtroProduto || filtroStatus || filtroTag) && (
             <button 
               className="clear-btn"
               onClick={() => {
@@ -331,6 +410,8 @@ function ReunioesLista() {
                 setFiltroEmpresa('')
                 setFiltroProduto('')
                 setFiltroStatus('')
+                setFiltroTags([])
+                setFiltroTag('')
               }}
               title="Limpar todos os filtros"
             >
@@ -338,6 +419,7 @@ function ReunioesLista() {
             </button>
           )}
         </div>
+
         
         <div className="results-count">
           {reunioesFiltradas.length} {reunioesFiltradas.length === 1 ? 'reunião encontrada' : 'reuniões encontradas'}

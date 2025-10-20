@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
+import { listarTags, criarTag, atualizarTag, excluirTag } from '../services/tagsService'
 import './Gerenciar.css'
 
 function Gerenciar() {
@@ -57,6 +58,13 @@ function Gerenciar() {
             <span className="tab-icon">■</span>
             <span>PARTICIPANTES</span>
           </button>
+          <button 
+            className={`tab-gerenciar ${activeTab === 'tags' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tags')}
+          >
+            <span className="tab-icon">■</span>
+            <span>TAGS</span>
+          </button>
         </div>
       </div>
 
@@ -64,6 +72,7 @@ function Gerenciar() {
         {activeTab === 'empresas' && <EmpresasManager onMessage={handleMessage} />}
         {activeTab === 'produtos' && <ProdutosManager onMessage={handleMessage} />}
         {activeTab === 'participantes' && <ParticipantesManager onMessage={handleMessage} />}
+        {activeTab === 'tags' && <TagsManager onMessage={handleMessage} />}
       </div>
     </div>
   )
@@ -833,6 +842,252 @@ function ParticipantesManager({ onMessage }) {
                       className="btn-action btn-delete"
                       onClick={() => excluirParticipante(participante.id)}
                       title="Excluir participante"
+                    >
+                      EXCLUIR
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Componente para gerenciar tags
+function TagsManager({ onMessage }) {
+  const [tags, setTags] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState({ id: null, nome: '', cor: '#3b82f6' })
+  const [isEditing, setIsEditing] = useState(false)
+  const [isFormExpanded, setIsFormExpanded] = useState(false)
+
+  useEffect(() => {
+    carregarTags()
+  }, [])
+
+  const carregarTags = async () => {
+    try {
+      const { data, error } = await listarTags()
+
+      if (error) throw error
+      setTags(data || [])
+    } catch (error) {
+      console.error('Erro ao carregar tags:', error)
+      onMessage('Erro ao carregar tags: ' + error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      if (isEditing) {
+        // Atualizar tag existente
+        const { error } = await atualizarTag(formData.id, formData.nome, formData.cor)
+
+        if (error) throw error
+        onMessage('Tag atualizada com sucesso!')
+      } else {
+        // Criar nova tag
+        const { error } = await criarTag(formData.nome, formData.cor)
+
+        if (error) throw error
+        onMessage('Tag criada com sucesso!')
+      }
+
+      setFormData({ id: null, nome: '', cor: '#3b82f6' })
+      setIsEditing(false)
+      setIsFormExpanded(false)
+      carregarTags()
+    } catch (error) {
+      console.error('Erro ao salvar tag:', error)
+      onMessage('Erro ao salvar tag: ' + error.message)
+    }
+  }
+
+  const editarTag = (tag) => {
+    setFormData({ id: tag.id, nome: tag.nome, cor: tag.cor })
+    setIsEditing(true)
+    setIsFormExpanded(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const cancelarEdicao = () => {
+    setFormData({ id: null, nome: '', cor: '#3b82f6' })
+    setIsEditing(false)
+    setIsFormExpanded(false)
+  }
+
+  const excluirTagConfirm = async (id) => {
+    if (!confirm('Tem certeza que deseja excluir esta tag? Ela será removida de todas as reuniões.')) {
+      return
+    }
+
+    try {
+      const { error } = await excluirTag(id)
+
+      if (error) throw error
+
+      onMessage('Tag excluída com sucesso!')
+      carregarTags()
+    } catch (error) {
+      console.error('Erro ao excluir tag:', error)
+      onMessage('Erro ao excluir tag: ' + error.message)
+    }
+  }
+
+  // Função para determinar se o texto deve ser branco ou preto baseado na cor de fundo
+  const getContrastColor = (hexColor) => {
+    // Remover o # se presente
+    const color = hexColor.replace('#', '')
+    
+    // Converter para RGB
+    const r = parseInt(color.substr(0, 2), 16)
+    const g = parseInt(color.substr(2, 2), 16)
+    const b = parseInt(color.substr(4, 2), 16)
+    
+    // Calcular luminosidade
+    const luminosity = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    
+    // Retornar preto para cores claras, branco para cores escuras
+    return luminosity > 0.5 ? '#000' : '#fff'
+  }
+
+  if (loading) return (
+    <div className="loading-state">
+      <div className="loading-spinner"></div>
+      <p>CARREGANDO DADOS...</p>
+    </div>
+  )
+
+  return (
+    <div className="manager-container">
+      <div className="form-card">
+        <div className="form-card-header" onClick={() => setIsFormExpanded(!isFormExpanded)}>
+          <div className="form-card-title">
+            <span className="form-icon">▼</span>
+            <h3>{isEditing ? 'EDITAR TAG' : 'NOVA TAG'}</h3>
+          </div>
+          <button 
+            type="button" 
+            className="btn-toggle-form"
+          >
+            {isFormExpanded ? '▲' : '▼'}
+          </button>
+        </div>
+        
+        {isFormExpanded && (
+          <form onSubmit={handleSubmit} className="form-modern">
+            <div className="form-row-double">
+              <div className="form-field">
+                <label htmlFor="nome">NOME DA TAG</label>
+                <input
+                  type="text"
+                  id="nome"
+                  className="input-modern"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  placeholder="Digite o nome da tag..."
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="cor">COR DA TAG</label>
+                <div className="color-input-wrapper">
+                  <input
+                    type="color"
+                    id="cor"
+                    className="color-picker"
+                    value={formData.cor}
+                    onChange={(e) => setFormData({ ...formData, cor: e.target.value })}
+                    required
+                  />
+                  <input
+                    type="text"
+                    className="color-text-input"
+                    value={formData.cor}
+                    onChange={(e) => setFormData({ ...formData, cor: e.target.value })}
+                    placeholder="#000000"
+                    pattern="^#[0-9A-Fa-f]{6}$"
+                  />
+                  <div 
+                    className="color-preview"
+                    style={{ 
+                      backgroundColor: formData.cor,
+                      border: '2px solid #000'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="form-actions-modern">
+              <button type="submit" className="btn btn-success">
+                {isEditing ? '✓ ATUALIZAR' : '+ ADICIONAR'}
+              </button>
+              {isEditing && (
+                <button type="button" className="btn btn-primary" onClick={cancelarEdicao}>
+                  ✕ CANCELAR
+                </button>
+              )}
+            </div>
+          </form>
+        )}
+      </div>
+
+      <div className="data-section">
+        <div className="section-header">
+          <h3>TAGS CADASTRADAS</h3>
+          <span className="count-badge">{tags.length}</span>
+        </div>
+        
+        {tags.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">□</div>
+            <p>Nenhuma tag cadastrada</p>
+            <span className="empty-hint">Clique em "Nova Tag" para começar</span>
+          </div>
+        ) : (
+          <div className="data-table-modern">
+            <div className="table-header-modern">
+              <div className="col-tag-nome">TAG</div>
+              <div className="col-tag-cor">COR</div>
+              <div className="col-tag-actions">AÇÕES</div>
+            </div>
+            <div className="table-body-modern">
+              {tags.map(tag => (
+                <div key={tag.id} className="table-row-modern">
+                  <div className="col-tag-nome">
+                    <div 
+                      className="tag-badge-large"
+                      style={{ 
+                        backgroundColor: tag.cor,
+                        color: getContrastColor(tag.cor),
+                        border: '2px solid #000'
+                      }}
+                    >
+                      {tag.nome}
+                    </div>
+                  </div>
+                  <div className="col-tag-cor">
+                    <span className="tag-color-code">{tag.cor.toUpperCase()}</span>
+                  </div>
+                  <div className="col-tag-actions">
+                    <button 
+                      className="btn-action btn-edit"
+                      onClick={() => editarTag(tag)}
+                      title="Editar tag"
+                    >
+                      EDITAR
+                    </button>
+                    <button 
+                      className="btn-action btn-delete"
+                      onClick={() => excluirTagConfirm(tag.id)}
+                      title="Excluir tag"
                     >
                       EXCLUIR
                     </button>

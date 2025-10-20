@@ -13,6 +13,7 @@
 - Fall back pra quando der problema → enxergar e agir
 - Compartilhar cliente
 - Controle de login
+- Duplicação -> Checar se o documento já foi trabalhado ou não. 
 
 
 
