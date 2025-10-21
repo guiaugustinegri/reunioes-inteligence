@@ -27,6 +27,7 @@ function ReuniaoDetalhes() {
   const [participantesEmpresa, setParticipantesEmpresa] = useState([])
   const [emailsDestinatarios, setEmailsDestinatarios] = useState([]) // Array de strings de emails
   const [historicoEmails, setHistoricoEmails] = useState([]) // Histórico de envios
+  const [transcricaoExpandida, setTranscricaoExpandida] = useState(false) // Estado para controlar expansão da transcrição
 
   useEffect(() => {
     carregarReuniao()
@@ -576,6 +577,40 @@ function ReuniaoDetalhes() {
     }
   }
 
+  const copiarTranscricao = async () => {
+    try {
+      const transcricao = reuniao.transcricao_completa
+      
+      // Usa a API moderna de clipboard
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(transcricao)
+      } else {
+        // Fallback para navegadores mais antigos
+        const textArea = document.createElement('textarea')
+        textArea.value = transcricao
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        textArea.remove()
+      }
+      
+      setMessage('Transcrição copiada para área de transferência!')
+      
+      // Remove a mensagem após 3 segundos
+      setTimeout(() => {
+        setMessage('')
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Erro ao copiar transcrição:', error)
+      setMessage('Erro ao copiar transcrição: ' + error.message)
+    }
+  }
+
   const formatarData = (data) => {
     if (!data) return '-'
     // Criar a data considerando apenas a parte da data, ignorando timezone
@@ -1098,11 +1133,43 @@ function ReuniaoDetalhes() {
           </div>
         )}
 
-        {/* Card de Transcrição */}
+        {/* Card de Transcrição - Expansível */}
         {reuniao.transcricao_completa && (
           <div className="detalhes-card">
-            <h3>Transcrição Completa</h3>
-            <div className="detalhe-texto transcricao">{reuniao.transcricao_completa}</div>
+            <div className="detalhes-header">
+              <h3>Transcrição Completa</h3>
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                <button 
+                  className="btn btn-primary btn-sm"
+                  onClick={() => setTranscricaoExpandida(!transcricaoExpandida)}
+                  title={transcricaoExpandida ? "Minimizar transcrição" : "Expandir transcrição"}
+                >
+                  {transcricaoExpandida ? '▼ Minimizar' : '▶ Expandir'}
+                </button>
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={copiarTranscricao}
+                  title="Copiar transcrição para área de transferência"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+            {transcricaoExpandida && (
+              <div className="detalhe-texto transcricao">{reuniao.transcricao_completa}</div>
+            )}
+            {!transcricaoExpandida && (
+              <div style={{ 
+                padding: '0.75rem', 
+                background: '#f9fafb', 
+                border: '2px solid #d1d5db',
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                fontStyle: 'italic'
+              }}>
+                Transcrição disponível - clique em "Expandir" para visualizar
+              </div>
+            )}
           </div>
         )}
 

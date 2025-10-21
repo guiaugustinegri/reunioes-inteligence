@@ -16,6 +16,7 @@ function ReuniaoForm() {
     resumo_conciso: '',
     resumo_ia: '',
     tarefas_guilherme: '',
+    todo_cliente: '',
     transcricao_completa: '',
     empresa_id: '',
     produto_id: '',
@@ -101,6 +102,7 @@ function ReuniaoForm() {
             resumo_conciso: reuniaoData.resumo_conciso || '',
             resumo_ia: reuniaoData.resumo_ia || '',
             tarefas_guilherme: reuniaoData.tarefas_guilherme || '',
+            todo_cliente: reuniaoData.todo_cliente || '',
             transcricao_completa: reuniaoData.transcricao_completa || '',
             empresa_id: reuniaoData.empresa_id || '',
             produto_id: reuniaoData.produto_id || '',
@@ -224,6 +226,7 @@ function ReuniaoForm() {
         resumo_conciso: formData.resumo_conciso,
         resumo_ia: formData.resumo_ia,
         tarefas_guilherme: formData.tarefas_guilherme,
+        todo_cliente: formData.todo_cliente,
         transcricao_completa: formData.transcricao_completa,
         empresa_id: formData.empresa_id || null,
         produto_id: formData.produto_id || null,
@@ -599,6 +602,19 @@ function ReuniaoForm() {
             value={formData.tarefas_guilherme}
             onChange={handleInputChange}
             placeholder="Lista de tarefas do Guilherme..."
+            rows="5"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="todo_cliente">To-do Cliente:</label>
+          <textarea
+            id="todo_cliente"
+            name="todo_cliente"
+            className="form-control"
+            value={formData.todo_cliente}
+            onChange={handleInputChange}
+            placeholder="Lista de tarefas e compromissos do cliente..."
             rows="5"
           />
         </div>
