@@ -731,6 +731,22 @@ function ReuniaoDetalhes() {
                 </div>
               </div>
             )}
+            {reuniao.gravacao_url && (
+              <div className="detalhe-item">
+                <label>Gravação:</label>
+                <div className="detalhe-valor">
+                  <a 
+                    href={reuniao.gravacao_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn btn-primary btn-sm"
+                    style={{ display: 'inline-block', fontSize: '0.875rem' }}
+                  >
+                    🎥 Abrir Gravação
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

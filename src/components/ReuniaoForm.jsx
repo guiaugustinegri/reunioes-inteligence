@@ -18,6 +18,7 @@ function ReuniaoForm() {
     tarefas_guilherme: '',
     todo_cliente: '',
     transcricao_completa: '',
+    gravacao_url: '',
     empresa_id: '',
     produto_id: '',
     serie_id: '',
@@ -104,6 +105,7 @@ function ReuniaoForm() {
             tarefas_guilherme: reuniaoData.tarefas_guilherme || '',
             todo_cliente: reuniaoData.todo_cliente || '',
             transcricao_completa: reuniaoData.transcricao_completa || '',
+            gravacao_url: reuniaoData.gravacao_url || '',
             empresa_id: reuniaoData.empresa_id || '',
             produto_id: reuniaoData.produto_id || '',
             serie_id: reuniaoData.serie_id || '',
@@ -228,6 +230,7 @@ function ReuniaoForm() {
         tarefas_guilherme: formData.tarefas_guilherme,
         todo_cliente: formData.todo_cliente,
         transcricao_completa: formData.transcricao_completa,
+        gravacao_url: formData.gravacao_url,
         empresa_id: formData.empresa_id || null,
         produto_id: formData.produto_id || null,
         serie_id: formData.serie_id || null,
@@ -628,6 +631,19 @@ function ReuniaoForm() {
             value={formData.transcricao_completa}
             onChange={handleInputChange}
             placeholder="Cole aqui a transcrição completa do áudio..."
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="gravacao_url">Gravação (URL):</label>
+          <input
+            type="url"
+            id="gravacao_url"
+            name="gravacao_url"
+            className="form-control"
+            value={formData.gravacao_url}
+            onChange={handleInputChange}
+            placeholder="https://drive.google.com/..."
           />
         </div>
 
