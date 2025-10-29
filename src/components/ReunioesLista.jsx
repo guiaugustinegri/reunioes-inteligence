@@ -191,7 +191,8 @@ function ReunioesLista() {
     // Usar UTC para evitar problemas de timezone
     const dia = dataObj.getUTCDate().toString().padStart(2, '0')
     const mes = (dataObj.getUTCMonth() + 1).toString().padStart(2, '0')
-    return `${dia}/${mes}`
+    const ano = dataObj.getUTCFullYear()
+    return `${dia}/${mes}/${ano}`
   }
 
   const getContrastColor = (hexColor) => {

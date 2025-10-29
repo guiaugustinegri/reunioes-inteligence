@@ -161,7 +161,7 @@ function ResumoIA() {
         to_email: emailData.destinatario,
         subject: emailData.assunto || `Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`,
         message: document.getElementById('resumo-content').innerHTML,
-        from_name: 'Sistema de Reuniões'
+        from_name: 'Powered by Traction Resumer v0.1'
       }
 
       console.log('Enviando e-mail com parâmetros:', templateParams)

@@ -368,24 +368,43 @@ function ReuniaoDetalhes() {
       const { SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY } = EMAILJS_CONFIG
       let conteudoHTML = document.getElementById('resumo-ia-content').innerHTML
       
+      // Declarar variáveis antes de usar
+      const empresa = reuniao.empresas?.nome || ''
+      const produto = reuniao.produtos?.nome || ''
+      const data = reuniao.data_reuniao ? formatarData(reuniao.data_reuniao) : ''
+      
+      // Substituir o título original pelo formato padronizado no corpo do email
+      const tituloPadronizado = `Resumo Reunião ${empresa}${produto ? ' - ' + produto : ''}${data ? ' - ' + data : ''}`
+      conteudoHTML = conteudoHTML.replace(
+        /<h1[^>]*>.*?<\/h1>/g, 
+        `<h1 style="margin: 0 0 1rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000; border-bottom: 2px solid #000; padding-bottom: 0.5rem;">${tituloPadronizado}</h1>`
+      )
+      
       // Se os checkboxes estiverem marcados, adicionar o resumo conciso e to-do cliente no início
       let conteudoAdicional = ''
       
       if (emailData.incluirResumoConciso && reuniao.resumo_conciso) {
+        const resumoItems = reuniao.resumo_conciso.split(';').filter(item => item.trim()).map(item => {
+          const trimmed = item.trim()
+          return `• ${trimmed.charAt(0).toUpperCase() + trimmed.slice(1)}`
+        }).join('<br>')
         conteudoAdicional += `
           <div style="background-color: #f9fafb; border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
             <h3 style="margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000;">RESUMO CONCISO</h3>
-            <p style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${reuniao.resumo_conciso}</p>
+            <div style="margin: 0; color: #111827; font-family: Arial, Helvetica, sans-serif;">${resumoItems}</div>
           </div>
         `
       }
       
       if (emailData.incluirTodoCliente && reuniao.todo_cliente) {
-        const todoItems = reuniao.todo_cliente.split(';').filter(item => item.trim()).map(item => `• ${item.trim()}`).join('<br>')
+        const todoItems = reuniao.todo_cliente.split(';').filter(item => item.trim()).map(item => {
+          const trimmed = item.trim()
+          return `• ${trimmed.charAt(0).toUpperCase() + trimmed.slice(1)}`
+        }).join('<br>')
         conteudoAdicional += `
           <div style="background-color: #f9fafb; border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
             <h3 style="margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000;">TO-DO</h3>
-            <div style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${todoItems}</div>
+            <div style="margin: 0; color: #111827; font-family: Arial, Helvetica, sans-serif;">${todoItems}</div>
           </div>
         `
       }
@@ -394,7 +413,9 @@ function ReuniaoDetalhes() {
         conteudoHTML = conteudoAdicional + conteudoHTML
       }
       
-      const assuntoEmail = emailData.assunto || `Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`
+      // Formatar assunto no padrão: Ata Reunião Empresa - Produto - Data
+      const assuntoPadrao = `Ata Reunião ${empresa}${produto ? ' - ' + produto : ''}${data ? ' - ' + data : ''}`
+      const assuntoEmail = emailData.assunto || assuntoPadrao
 
       // Enviar para cada destinatário
       let enviados = 0
@@ -406,7 +427,7 @@ function ReuniaoDetalhes() {
             to_email: email,
             subject: assuntoEmail,
             message: conteudoHTML,
-            from_name: 'Sistema de Reuniões'
+            from_name: 'Powered by Traction Resumer v0.1'
           }
 
           console.log('📧 Enviando email para:', email)
@@ -1083,7 +1104,7 @@ function ReuniaoDetalhes() {
                     type="text"
                     id="assunto"
                     className="form-control"
-                    value={emailData.assunto}
+                    value={emailData.assunto || ''}
                     onChange={(e) => setEmailData({ ...emailData, assunto: e.target.value })}
                     placeholder={`Ata Reunião...`}
                   />
@@ -1157,7 +1178,13 @@ function ReuniaoDetalhes() {
         {reuniao.resumo_ultra_conciso && (
           <div className="detalhes-card">
             <h3>Resumo Ultra Conciso</h3>
-            <div className="detalhe-texto">{reuniao.resumo_ultra_conciso}</div>
+            <div className="detalhe-texto">
+              {reuniao.resumo_ultra_conciso.split(';').filter(item => item.trim()).map((item, index) => (
+                <div key={index} style={{ marginBottom: '0.5rem' }}>
+                  • {item.trim().charAt(0).toUpperCase() + item.trim().slice(1)}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1165,7 +1192,13 @@ function ReuniaoDetalhes() {
         {reuniao.resumo_conciso && (
           <div className="detalhes-card">
             <h3>Resumo Conciso</h3>
-            <div className="detalhe-texto">{reuniao.resumo_conciso}</div>
+            <div className="detalhe-texto">
+              {reuniao.resumo_conciso.split(';').filter(item => item.trim()).map((item, index) => (
+                <div key={index} style={{ marginBottom: '0.5rem' }}>
+                  • {item.trim().charAt(0).toUpperCase() + item.trim().slice(1)}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1173,7 +1206,13 @@ function ReuniaoDetalhes() {
         {reuniao.tarefas_guilherme && (
           <div className="detalhes-card">
             <h3>To-do Guilherme</h3>
-            <div className="detalhe-texto">{reuniao.tarefas_guilherme}</div>
+            <div className="detalhe-texto">
+              {reuniao.tarefas_guilherme.split(';').filter(item => item.trim()).map((item, index) => (
+                <div key={index} style={{ marginBottom: '0.5rem' }}>
+                  • {item.trim().charAt(0).toUpperCase() + item.trim().slice(1)}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -1184,7 +1223,7 @@ function ReuniaoDetalhes() {
             <div className="detalhe-texto">
               {reuniao.todo_cliente.split(';').filter(item => item.trim()).map((item, index) => (
                 <div key={index} style={{ marginBottom: '0.5rem' }}>
-                  • {item.trim()}
+                  • {item.trim().charAt(0).toUpperCase() + item.trim().slice(1)}
                 </div>
               ))}
             </div>

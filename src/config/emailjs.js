@@ -28,7 +28,7 @@ Segue o resumo da reunião conforme solicitado:
 {{message}}
 
 Atenciosamente,
-Sistema de Reuniões
+Powered by Traction Resumer v0.1
 */
 
 // IMPORTANTE: Configure este template no EmailJS com exatamente estes parâmetros:
