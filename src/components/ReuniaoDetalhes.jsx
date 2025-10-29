@@ -22,7 +22,8 @@ function ReuniaoDetalhes() {
     destinatario: '',
     assunto: '',
     showEmailForm: false,
-    incluirResumoConciso: false
+    incluirResumoConciso: false,
+    incluirTodoCliente: false
   })
   const [participantesEmpresa, setParticipantesEmpresa] = useState([])
   const [emailsDestinatarios, setEmailsDestinatarios] = useState([]) // Array de strings de emails
@@ -367,15 +368,29 @@ function ReuniaoDetalhes() {
       const { SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY } = EMAILJS_CONFIG
       let conteudoHTML = document.getElementById('resumo-ia-content').innerHTML
       
-      // Se o checkbox estiver marcado, adicionar o resumo conciso no início
+      // Se os checkboxes estiverem marcados, adicionar o resumo conciso e to-do cliente no início
+      let conteudoAdicional = ''
+      
       if (emailData.incluirResumoConciso && reuniao.resumo_conciso) {
-        const resumoConcisoHTML = `
+        conteudoAdicional += `
           <div style="background-color: #f9fafb; border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
             <h3 style="margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000;">RESUMO CONCISO</h3>
             <p style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${reuniao.resumo_conciso}</p>
           </div>
         `
-        conteudoHTML = resumoConcisoHTML + conteudoHTML
+      }
+      
+      if (emailData.incluirTodoCliente && reuniao.todo_cliente) {
+        conteudoAdicional += `
+          <div style="background-color: #f9fafb; border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000;">TO-DO</h3>
+            <p style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${reuniao.todo_cliente}</p>
+          </div>
+        `
+      }
+      
+      if (conteudoAdicional) {
+        conteudoHTML = conteudoAdicional + conteudoHTML
       }
       
       const assuntoEmail = emailData.assunto || `Resumo da Reunião: ${reuniao.titulo_original || 'Reunião'}`
@@ -899,7 +914,7 @@ function ReuniaoDetalhes() {
               <div className="email-form">
                 <h4>Enviar Resumo por E-mail</h4>
 
-                {/* Opção de incluir Resumo Conciso */}
+                {/* Opções de conteúdo adicional */}
                 <div className="form-group">
                   <div className="checkbox-item">
                     <input
@@ -910,6 +925,18 @@ function ReuniaoDetalhes() {
                     />
                     <label htmlFor="incluir-resumo-conciso">
                       Incluir Resumo Conciso acima do template
+                    </label>
+                  </div>
+                  
+                  <div className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      id="incluir-todo-cliente"
+                      checked={emailData.incluirTodoCliente}
+                      onChange={(e) => setEmailData({ ...emailData, incluirTodoCliente: e.target.checked })}
+                    />
+                    <label htmlFor="incluir-todo-cliente">
+                      Incluir To-do Cliente acima do template
                     </label>
                   </div>
                 </div>
