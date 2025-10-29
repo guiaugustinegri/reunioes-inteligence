@@ -381,10 +381,11 @@ function ReuniaoDetalhes() {
       }
       
       if (emailData.incluirTodoCliente && reuniao.todo_cliente) {
+        const todoItems = reuniao.todo_cliente.split(';').filter(item => item.trim()).map(item => `• ${item.trim()}`).join('<br>')
         conteudoAdicional += `
           <div style="background-color: #f9fafb; border: 2px solid #000; padding: 1rem; margin-bottom: 1.5rem;">
             <h3 style="margin: 0 0 0.5rem 0; text-transform: uppercase; letter-spacing: 2px; color: #000;">TO-DO</h3>
-            <p style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${reuniao.todo_cliente}</p>
+            <div style="margin: 0; color: #111827; font-family: 'Courier New', 'Consolas', monospace;">${todoItems}</div>
           </div>
         `
       }
@@ -1180,7 +1181,13 @@ function ReuniaoDetalhes() {
         {reuniao.todo_cliente && (
           <div className="detalhes-card">
             <h3>To-do Cliente</h3>
-            <div className="detalhe-texto">{reuniao.todo_cliente}</div>
+            <div className="detalhe-texto">
+              {reuniao.todo_cliente.split(';').filter(item => item.trim()).map((item, index) => (
+                <div key={index} style={{ marginBottom: '0.5rem' }}>
+                  • {item.trim()}
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
