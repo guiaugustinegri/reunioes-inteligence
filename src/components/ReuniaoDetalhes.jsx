@@ -999,6 +999,14 @@ function ReuniaoDetalhes() {
                   >
                     + Emails do Produto ({participantesEmpresa.filter(p => p.email && !p.nome.toLowerCase().includes('guilherme')).length})
                   </button>
+                  
+                  <button 
+                    className="btn btn-info btn-sm"
+                    onClick={() => adicionarEmail('guilherme@tracao.online')}
+                    title="Adicionar email do admin (Guilherme) para receber cópia"
+                  >
+                    + Enviar cópia pra mim
+                  </button>
                 </div>
                 
                 {participantes.filter(p => p.email).length === 0 && (
